@@ -53,8 +53,8 @@ const MATERIAL_CONFIG = {
 
 // Edita este bloque para cambiar la animación del logo durante el scroll.
 const SCROLL_CONFIG = {
-  distance: 0.9, // Fracción de pantalla necesaria para completar la animación.
-  approach: 2.2, // Distancia que el logo avanza hacia la cámara.
+  distance: 0.5, // Fracción de pantalla necesaria para completar la animación.
+  approach: 2.5, // Distancia que el logo avanza hacia la cámara.
   tilt: -0.9, // Inclinación final hacia atrás, en radianes.
   response: 7, // Suavidad con la que sigue al scroll.
 } as const;
