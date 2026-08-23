@@ -3,7 +3,15 @@
 }
 
 :root {
-  --color-accent: #e66100;
+  /* MAGMA — corporate palette */
+  --color-brand-off-white: #e0e0e0;
+  --color-brand-soft-black: #3f3f3f;
+  --color-brand-magma-orange: #e66100;
+
+  /* Semantic aliases */
+  --color-background: var(--color-brand-off-white);
+  --color-foreground: var(--color-brand-soft-black);
+  --color-accent: var(--color-brand-magma-orange);
 }
 
 html,
@@ -18,8 +26,8 @@ html {
 }
 
 body {
-  background: #e0e0e0;
-  color: #111110;
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: var(--font-geist-sans), Arial, sans-serif;
   overflow-x: hidden;
 }
@@ -43,8 +51,8 @@ canvas {
 }
 
 ::selection {
-  background: #111110;
-  color: #f7f6f1;
+  background: var(--color-foreground);
+  color: var(--color-background);
 }
 
 @media (prefers-reduced-motion: reduce) {

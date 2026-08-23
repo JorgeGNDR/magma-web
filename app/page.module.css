@@ -1,6 +1,6 @@
 .header {
   align-items: center;
-  color: #111110;
+  color: var(--color-brand-soft-black);
   display: grid;
   font-size: 0.72rem;
   grid-template-columns: 1fr auto 1fr;
@@ -119,8 +119,8 @@
 }
 
 .manifesto {
-  background: #111110;
-  color: #f7f6f1;
+  background: var(--color-brand-soft-black);
+  color: var(--color-brand-off-white);
   min-height: 100svh;
   padding: 2rem 1.6rem 5rem;
   position: relative;
@@ -152,10 +152,10 @@
 }
 
 .ticker {
-  background: #f7f6f1;
-  border-bottom: 1px solid #111110;
-  border-top: 1px solid #111110;
-  color: #111110;
+  background: var(--color-brand-off-white);
+  border-bottom: 1px solid var(--color-brand-soft-black);
+  border-top: 1px solid var(--color-brand-soft-black);
+  color: var(--color-brand-soft-black);
   overflow: hidden;
   padding: 0.8rem 0;
   position: relative;
@@ -184,8 +184,8 @@
 }
 
 .services {
-  background: #f7f6f1;
-  color: #111110;
+  background: var(--color-brand-off-white);
+  color: var(--color-brand-soft-black);
   padding: 2rem 1.6rem 8rem;
   position: relative;
   scroll-margin-top: 4rem;
@@ -226,7 +226,7 @@
 
 .projects {
   background: var(--color-accent);
-  color: #f7f6f1;
+  color: var(--color-brand-off-white);
   min-height: 100svh;
   padding: 2rem 1.6rem 8rem;
   position: relative;
@@ -294,8 +294,8 @@
 }
 
 .contact {
-  background: #111110;
-  color: #f7f6f1;
+  background: var(--color-brand-soft-black);
+  color: var(--color-brand-off-white);
   min-height: 100svh;
   padding: 2rem 1.6rem 1.6rem;
   position: relative;
