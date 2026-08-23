@@ -41,6 +41,24 @@ const LIQUID_CONFIG = {
   audioResponse: 9, // Rapidez con la que el logo sigue la música.
 } as const;
 
+// Edita este bloque para cambiar únicamente el volumen y la iluminación.
+const MATERIAL_CONFIG = {
+  bevelRadius: 0.026, // Anchura del borde redondeado.
+  bevelStrength: 1.7, // Profundidad aparente del bisel.
+  ambientLight: 0.64, // Luz mínima de la superficie.
+  diffuseLight: 0.43, // Contraste entre las zonas iluminadas y las oscuras.
+  specularStrength: 0.12, // Intensidad del brillo suave.
+  specularPower: 20, // Tamaño del brillo: más alto = más concentrado.
+} as const;
+
+// Edita este bloque para cambiar la animación del logo durante el scroll.
+const SCROLL_CONFIG = {
+  distance: 0.9, // Fracción de pantalla necesaria para completar la animación.
+  approach: 2.2, // Distancia que el logo avanza hacia la cámara.
+  tilt: -0.9, // Inclinación final hacia atrás, en radianes.
+  response: 7, // Suavidad con la que sigue al scroll.
+} as const;
+
 const vertexShader = /* glsl */ `
   varying vec2 vUv;
 
@@ -162,7 +180,40 @@ const fragmentShader = /* glsl */ `
     );
     if (alpha < 0.003) discard;
 
-    gl_FragColor = vec4(uColor, alpha);
+    // Sample a wider neighbourhood to rebuild a rounded bevel rather than a
+    // one-pixel outline. It remains attached to the deformed liquid density.
+    vec2 bevelStep = vec2(
+      ${MATERIAL_CONFIG.bevelRadius.toFixed(3)} / uAspect,
+      ${MATERIAL_CONFIG.bevelRadius.toFixed(3)}
+    );
+    float densityLeft = warpedDensityAt(logoUv - vec2(bevelStep.x, 0.0));
+    float densityRight = warpedDensityAt(logoUv + vec2(bevelStep.x, 0.0));
+    float densityDown = warpedDensityAt(logoUv - vec2(0.0, bevelStep.y));
+    float densityUp = warpedDensityAt(logoUv + vec2(0.0, bevelStep.y));
+    vec2 densityGradient = vec2(
+      densityRight - densityLeft,
+      densityUp - densityDown
+    );
+    vec3 surfaceNormal = normalize(vec3(
+      -densityGradient.x * ${MATERIAL_CONFIG.bevelStrength.toFixed(2)},
+      -densityGradient.y * ${MATERIAL_CONFIG.bevelStrength.toFixed(2)},
+      1.0
+    ));
+
+    vec3 lightDirection = normalize(vec3(-0.48, 0.62, 0.82));
+    vec3 viewDirection = vec3(0.0, 0.0, 1.0);
+    vec3 halfDirection = normalize(lightDirection + viewDirection);
+
+    float diffuse = max(dot(surfaceNormal, lightDirection), 0.0);
+    float specular = pow(
+      max(dot(surfaceNormal, halfDirection), 0.0),
+      ${MATERIAL_CONFIG.specularPower.toFixed(1)}
+    ) * ${MATERIAL_CONFIG.specularStrength.toFixed(3)};
+    float lighting = ${MATERIAL_CONFIG.ambientLight.toFixed(3)} +
+      diffuse * ${MATERIAL_CONFIG.diffuseLight.toFixed(3)};
+
+    vec3 shadedColor = uColor * lighting + vec3(specular);
+    gl_FragColor = vec4(shadedColor, alpha);
   }
 `;
 
@@ -182,6 +233,7 @@ export function ContinuousLiquidLogo() {
   const groupRef = useRef<THREE.Group>(null);
   const lastPointerRef = useRef<THREE.Vector2 | null>(null);
   const lastEventTimeRef = useRef(0);
+  const scrollProgressRef = useRef(0);
   const strengthTargetRef = useRef(0);
 
   const uniforms = useMemo(
@@ -244,7 +296,33 @@ export function ContinuousLiquidLogo() {
       safeDelta,
     );
 
-    groupRef.current?.scale.setScalar(responsiveScale);
+    const scrollDistance = Math.max(
+      window.innerHeight * SCROLL_CONFIG.distance,
+      1,
+    );
+    const rawScrollProgress = THREE.MathUtils.clamp(
+      window.scrollY / scrollDistance,
+      0,
+      1,
+    );
+    const easedScrollProgress = THREE.MathUtils.smoothstep(
+      rawScrollProgress,
+      0,
+      1,
+    );
+    scrollProgressRef.current = THREE.MathUtils.damp(
+      scrollProgressRef.current,
+      easedScrollProgress,
+      SCROLL_CONFIG.response,
+      safeDelta,
+    );
+
+    const group = groupRef.current;
+    if (group) {
+      group.scale.setScalar(responsiveScale);
+      group.position.z = scrollProgressRef.current * SCROLL_CONFIG.approach;
+      group.rotation.x = scrollProgressRef.current * SCROLL_CONFIG.tilt;
+    }
   });
 
   function handlePointerMove(event: ThreeEvent<PointerEvent>) {

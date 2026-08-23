@@ -1,6 +1,6 @@
 export const brandColors = {
   offWhite: "#e0e0e0",
-  softBlack: "#3f3f3f",
+  softBlack: "#4a4a4a",
   magmaOrange: "#e66100",
 } as const;
 
