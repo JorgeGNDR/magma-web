@@ -1,0 +1,71 @@
+.player {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--color-accent);
+  cursor: pointer;
+  display: flex;
+  font: 600 clamp(0.62rem, 0.75vw, 0.74rem) / 1 var(--font-geist-sans);
+  gap: 0.55rem;
+  left: 50%;
+  letter-spacing: 0.01em;
+  padding: 0.5rem 0;
+  position: absolute;
+  text-transform: uppercase;
+  top: calc(50% + clamp(8rem, 20vh, 10.5rem));
+  transform: translateX(-50%);
+  z-index: 4;
+}
+
+.icon {
+  align-items: center;
+  display: flex;
+  height: 0.85rem;
+  justify-content: center;
+  width: 0.75rem;
+}
+
+.playIcon {
+  border-bottom: 0.38rem solid transparent;
+  border-left: 0.65rem solid currentColor;
+  border-top: 0.38rem solid transparent;
+  display: block;
+  height: 0;
+  transform-origin: center;
+  transition: transform 220ms ease;
+  width: 0;
+}
+
+.pauseIcon {
+  border-left: 0.18rem solid currentColor;
+  border-right: 0.18rem solid currentColor;
+  display: block;
+  height: 0.75rem;
+  width: 0.62rem;
+}
+
+.player:hover .playIcon {
+  transform: scale(1.12);
+}
+
+.player[data-state="missing"] {
+  opacity: 0.55;
+}
+
+.player:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 0.4rem;
+}
+
+@media (max-width: 800px) {
+  .player {
+    top: calc(50% + 6.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playIcon {
+    transition: none;
+  }
+}
