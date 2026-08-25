@@ -7,11 +7,23 @@
   left: 0;
   letter-spacing: 0.05em;
   padding: 1.4rem 1.6rem;
-  position: absolute;
+  pointer-events: auto;
+  position: fixed;
   text-transform: uppercase;
   top: 0;
+  transform: translateY(0);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
   width: 100%;
   z-index: 20;
+}
+
+.header[data-visible="false"] {
+  pointer-events: none;
+  transform: translateY(calc(-100% - 0.5rem));
+}
+
+.header[data-surface="dark"] {
+  color: var(--color-brand-off-white);
 }
 
 .brand {
@@ -65,10 +77,11 @@
   justify-self: end;
 }
 
-.availability span {
+.availabilityDot {
   background: var(--color-accent);
   border-radius: 50%;
   height: 0.45rem;
+  flex: 0 0 auto;
   width: 0.45rem;
 }
 
@@ -89,12 +102,14 @@
 .heroMeta {
   align-items: end;
   bottom: 1.6rem;
+  color: var(--color-brand-off-white);
   display: grid;
   font-size: clamp(0.68rem, 0.85vw, 0.8rem);
   grid-template-columns: 1fr 1fr auto;
   left: 1.6rem;
   letter-spacing: 0.02em;
   line-height: 1.45;
+  mix-blend-mode: difference;
   position: absolute;
   right: 1.6rem;
   text-transform: uppercase;
@@ -121,34 +136,104 @@
 .manifesto {
   background: var(--color-brand-soft-black);
   color: var(--color-brand-off-white);
-  min-height: 100svh;
-  padding: 2rem 1.6rem 5rem;
+  overflow: hidden;
   position: relative;
-  scroll-margin-top: 4rem;
+  scroll-margin-top: 0;
   z-index: 2;
+}
+
+.studioIntro {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 90svh;
+  padding: 2rem 1.6rem 5rem;
 }
 
 .manifestoContent {
   align-items: end;
+  align-self: end;
   display: grid;
-  gap: 3rem;
-  grid-template-columns: minmax(0, 3fr) minmax(16rem, 1fr);
-  margin-top: clamp(7rem, 17vh, 12rem);
+  gap: clamp(3rem, 7vw, 8rem);
+  grid-template-columns: minmax(0, 3fr) minmax(18rem, 1fr);
+  margin-top: clamp(8rem, 18vh, 13rem);
+  pointer-events: none;
+  position: relative;
+  width: 100%;
+  z-index: 3;
 }
 
 .manifesto h2 {
-  font-size: clamp(4rem, 10vw, 10rem);
+  font-size: clamp(4.5rem, 9.6vw, 10rem);
   font-weight: 500;
   letter-spacing: -0.075em;
-  line-height: 0.78;
+  line-height: 0.82;
+  max-width: 10ch;
   text-transform: uppercase;
 }
 
 .manifestoContent p {
-  font-size: clamp(1rem, 1.5vw, 1.35rem);
+  font-size: clamp(1rem, 1.35vw, 1.3rem);
   letter-spacing: -0.025em;
-  line-height: 1.35;
+  line-height: 1.4;
   max-width: 29rem;
+}
+
+.studioShowcase {
+  border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  display: grid;
+  gap: 1.5rem;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 100svh;
+  padding: 2rem 1.6rem;
+}
+
+.studioShowcaseHeader {
+  align-items: start;
+  display: grid;
+  font-family: var(--font-geist-mono);
+  font-size: 0.68rem;
+  gap: 2rem;
+  grid-template-columns: minmax(4rem, 1fr) 2fr 1fr;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.studioShowcaseHeader h3 {
+  font: inherit;
+}
+
+.studioShowcaseHeader p {
+  justify-self: end;
+  line-height: 1.45;
+  max-width: 20rem;
+}
+
+.studioScene {
+  cursor: grab;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+.studioScene:active {
+  cursor: grabbing;
+}
+
+.studioHint {
+  bottom: 1rem;
+  font-family: var(--font-geist-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  position: absolute;
+  right: 1rem;
+  text-transform: uppercase;
+  z-index: 4;
+}
+
+.mobileHint {
+  display: none;
 }
 
 .ticker {
@@ -192,8 +277,231 @@
   z-index: 2;
 }
 
+.serviceIntro {
+  align-items: end;
+  display: grid;
+  gap: clamp(3rem, 7vw, 8rem);
+  grid-template-columns: minmax(0, 3fr) minmax(18rem, 1fr);
+  margin: clamp(5rem, 9vw, 8rem) 0 clamp(3rem, 5vw, 5rem);
+}
+
+.serviceIntro h2 {
+  font-size: clamp(3.4rem, 6.8vw, 7rem);
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  line-height: 0.84;
+  text-transform: uppercase;
+}
+
+.serviceIntro > div {
+  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.serviceIntro p {
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  letter-spacing: -0.02em;
+  line-height: 1.45;
+  max-width: 27rem;
+}
+
+.serviceIntro a {
+  border-bottom: 1px solid currentColor;
+  font-family: var(--font-geist-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.35rem;
+  text-transform: uppercase;
+  transition:
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+.serviceIntro a:hover,
+.serviceIntro a:focus-visible {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  outline: none;
+}
+
+.onlineServiceList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.onlineService {
+  background: var(--color-brand-soft-black);
+  color: var(--color-brand-off-white);
+  display: flex;
+  flex-direction: column;
+  min-height: 22rem;
+  padding: 1.4rem;
+}
+
+.onlineService + .onlineService {
+  border-left: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+}
+
+.onlineServiceMeta {
+  display: grid;
+  font-family: var(--font-geist-mono);
+  font-size: 0.62rem;
+  grid-template-columns: minmax(3rem, 0.3fr) 1fr;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.onlineService h3 {
+  font-size: clamp(2.6rem, 4.5vw, 4.8rem);
+  font-weight: 500;
+  letter-spacing: -0.07em;
+  line-height: 0.85;
+  margin-top: clamp(2.5rem, 4vw, 4rem);
+  max-width: 8ch;
+  text-transform: uppercase;
+}
+
+.onlineService > p {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin-top: 1.5rem;
+  max-width: 29rem;
+}
+
+.onlineService ul {
+  font-family: var(--font-geist-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  list-style: none;
+  margin-top: 2.5rem;
+  text-transform: uppercase;
+}
+
+.onlineService li {
+  border-top: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  padding: 0.75rem 0;
+}
+
+.onlineService li::before {
+  color: var(--color-accent);
+  content: "●";
+  font-size: 0.55em;
+  margin-right: 0.75rem;
+  vertical-align: 0.12em;
+}
+
+.serviceRates {
+  border-top: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  font-family: var(--font-geist-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  margin-top: 0.75rem;
+  text-transform: uppercase;
+}
+
+.serviceRates summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+  padding: 0.8rem 0;
+}
+
+.serviceRates summary::-webkit-details-marker {
+  display: none;
+}
+
+.serviceRates summary span:last-child {
+  font-family: sans-serif;
+  font-size: 1rem;
+  transition: transform 250ms ease;
+}
+
+.serviceRates[open] summary span:last-child {
+  transform: rotate(45deg);
+}
+
+.serviceRates dl {
+  border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  padding-bottom: 0.5rem;
+}
+
+.serviceRates dl div {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+}
+
+.serviceRates dd {
+  color: var(--color-accent);
+  margin: 0;
+}
+
+.serviceAction {
+  align-items: end;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.servicePrice {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.servicePrice strong {
+  font-size: clamp(1.65rem, 2.4vw, 2.5rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+}
+
+.servicePrice span {
+  font-family: var(--font-geist-mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.quoteButton {
+  background: var(--color-accent);
+  color: var(--color-brand-soft-black);
+  display: inline-block;
+  font-family: var(--font-geist-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  padding: 0.75rem 0.85rem;
+  text-align: center;
+  text-transform: uppercase;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    transform 220ms ease;
+}
+
+.quoteButton:hover,
+.quoteButton:focus-visible {
+  background: var(--color-brand-soft-black);
+  color: var(--color-brand-off-white);
+  outline: none;
+  transform: translateY(-0.15rem);
+}
+
+.onlineService .quoteButton:hover,
+.onlineService .quoteButton:focus-visible {
+  background: var(--color-brand-off-white);
+  color: var(--color-brand-soft-black);
+}
+
 .serviceList {
-  margin-top: 7rem;
+  margin-top: clamp(4rem, 8vw, 8rem);
 }
 
 .service {
@@ -201,7 +509,11 @@
   border-top: 1px solid currentColor;
   display: grid;
   gap: 2rem;
-  grid-template-columns: minmax(4rem, 1fr) 2fr 1fr;
+  grid-template-columns:
+    minmax(7rem, 0.35fr)
+    minmax(0, 1.35fr)
+    minmax(22rem, 0.95fr)
+    minmax(2rem, 0.15fr);
   padding: 1.35rem 0 3.5rem;
 }
 
@@ -218,19 +530,63 @@
   text-transform: uppercase;
 }
 
-.service p {
+.serviceCopy > p {
   font-size: 0.95rem;
   line-height: 1.45;
   max-width: 24rem;
 }
 
+.serviceCopy > span {
+  display: block;
+  font-family: var(--font-geist-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  margin-top: 1.25rem;
+  text-transform: uppercase;
+}
+
+.pricingStrip {
+  align-items: center;
+  border-bottom: 1px solid currentColor;
+  border-top: 1px solid currentColor;
+  display: grid;
+  font-family: var(--font-geist-mono);
+  font-size: 0.6rem;
+  gap: 2rem;
+  grid-template-columns:
+    minmax(7rem, 0.35fr)
+    minmax(0, 1.35fr)
+    minmax(22rem, 0.95fr)
+    minmax(2rem, 0.15fr);
+  letter-spacing: 0.04em;
+  margin-top: 2.5rem;
+  padding: 1.25rem 0;
+  text-transform: uppercase;
+}
+
+.pricingStrip p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+}
+
+.pricingStrip strong {
+  font-weight: 500;
+}
+
+.pricingStrip small {
+  font: inherit;
+  line-height: 1.45;
+  text-transform: none;
+}
+
 .projects {
   background: var(--color-accent);
-  color: var(--color-brand-off-white);
+  color: var(--color-brand-soft-black);
   min-height: 100svh;
-  padding: 2rem 1.6rem 8rem;
+  padding: 2rem 1.6rem 10rem;
   position: relative;
-  scroll-margin-top: 4rem;
+  scroll-margin-top: 0;
   z-index: 2;
 }
 
@@ -255,47 +611,121 @@
   max-width: 22rem;
 }
 
-.project {
+.projectBlock {
+  border-top: 1px solid currentColor;
+  padding-top: 1.25rem;
+}
+
+.projectBlock + .projectBlock {
+  margin-top: clamp(3.5rem, 6vw, 6rem);
+}
+
+.projectBlockHeader {
+  align-items: start;
+  display: grid;
+  font-family: var(--font-geist-mono);
+  font-size: 0.68rem;
+  gap: 2rem;
+  grid-template-columns: minmax(4rem, 1fr) 2fr 1fr;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.projectBlockHeader h3 {
+  font: inherit;
+}
+
+.projectBlockHeader p {
+  justify-self: end;
+  line-height: 1.45;
+  max-width: 21rem;
+}
+
+.projectList {
+  border-bottom: 1px solid currentColor;
+  margin-top: 2.5rem;
+}
+
+.projectRow {
   align-items: center;
   border-top: 1px solid currentColor;
   display: grid;
   gap: 1rem;
-  grid-template-columns: 4rem 2fr 1fr 4rem 2rem;
-  min-height: 7rem;
-  transition: padding 300ms ease;
+  grid-template-columns: minmax(3rem, 0.45fr) 2fr 1fr auto 1.5rem;
+  isolation: isolate;
+  min-height: 5.6rem;
+  overflow: hidden;
+  position: relative;
+  transition: color 260ms ease;
 }
 
-.project:last-child {
-  border-bottom: 1px solid currentColor;
+.projectRow::before {
+  background: var(--color-brand-soft-black);
+  content: "";
+  inset: 0;
+  position: absolute;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: -1;
 }
 
-.project:hover {
-  padding: 0 1rem;
+.projectRow > * {
+  position: relative;
+  z-index: 1;
 }
 
-.project > span:first-child,
-.project time,
-.project p {
-  font-family: var(--font-geist-mono);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-}
-
-.project h3 {
-  font-size: clamp(1.8rem, 4vw, 4rem);
+.projectRow h4 {
+  font-size: clamp(1.25rem, 2.6vw, 2.8rem);
   font-weight: 500;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  margin: 0;
   text-transform: uppercase;
 }
 
-.projectArrow {
-  font-size: 1.3rem;
+.projectRow > span:first-child,
+.projectRow > span:last-child,
+.projectRow > p,
+.projectRow time,
+.projectRow div p {
+  font-family: var(--font-geist-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.projectRow div p {
+  margin-top: 0.3rem;
+}
+
+.projectRow > span:last-child {
+  font-family: inherit;
+  font-size: 1.2rem;
   justify-self: end;
+  transition: transform 350ms ease;
+}
+
+.projectRow:hover,
+.projectRow:focus-visible {
+  color: var(--color-brand-off-white);
+  outline: none;
+}
+
+.projectRow:hover::before,
+.projectRow:focus-visible::before {
+  transform: scaleY(1);
+}
+
+.projectRow:hover > span:last-child {
+  transform: rotate(45deg);
 }
 
 .contact {
   background: var(--color-brand-soft-black);
   color: var(--color-brand-off-white);
+  display: flex;
+  flex-direction: column;
   min-height: 100svh;
   padding: 2rem 1.6rem 1.6rem;
   position: relative;
@@ -304,7 +734,7 @@
 }
 
 .contactContent {
-  margin-top: clamp(9rem, 22vh, 16rem);
+  margin-top: clamp(6rem, 16vh, 11rem);
 }
 
 .contactContent p {
@@ -329,17 +759,160 @@
   color: var(--color-accent);
 }
 
+.contactLayout {
+  align-items: start;
+  display: grid;
+  gap: clamp(3rem, 9vw, 9rem);
+  grid-template-columns: minmax(15rem, 0.7fr) minmax(24rem, 1.3fr);
+  margin-top: clamp(5rem, 12vh, 9rem);
+}
+
+.contactIntro {
+  display: grid;
+  gap: 1.75rem;
+  max-width: 23rem;
+}
+
+.contactIntro p {
+  font-size: clamp(1.15rem, 1.6vw, 1.55rem);
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.contactIntro a {
+  font-family: var(--font-geist-mono);
+  font-size: 0.67rem;
+  letter-spacing: 0.035em;
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35rem;
+  text-transform: uppercase;
+  transition: color 200ms ease;
+}
+
+.contactIntro a:hover {
+  color: var(--color-accent);
+}
+
+.contactForm {
+  display: grid;
+  gap: 0 1.25rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+}
+
+.contactHoney {
+  display: none;
+}
+
+.contactField {
+  border-top: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 0 1.5rem;
+}
+
+.contactField label,
+.contactSubmit p {
+  font-family: var(--font-geist-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.contactField input,
+.contactField select,
+.contactField textarea {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.35;
+  outline: none;
+  padding: 0;
+  resize: vertical;
+  width: 100%;
+}
+
+.contactField input::placeholder,
+.contactField textarea::placeholder {
+  color: color-mix(in srgb, currentColor 48%, transparent);
+}
+
+.contactField select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 0.5rem) 50%,
+    100% 50%;
+  background-repeat: no-repeat;
+  background-size: 0.45rem 0.45rem, 0.45rem 0.45rem;
+  cursor: pointer;
+  padding-right: 1.5rem;
+}
+
+.contactField select option {
+  background: var(--color-brand-soft-black);
+  color: var(--color-brand-off-white);
+}
+
+.contactField:focus-within {
+  border-color: var(--color-accent);
+}
+
+.contactMessage {
+  grid-column: 1 / -1;
+}
+
+.contactSubmit {
+  align-items: center;
+  border-top: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  display: flex;
+  gap: 1.5rem;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+  padding-top: 1.2rem;
+}
+
+.contactSubmit p {
+  color: color-mix(in srgb, currentColor 62%, transparent);
+}
+
+.contactSubmit button {
+  background: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  color: var(--color-brand-soft-black);
+  cursor: pointer;
+  font-family: var(--font-geist-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  padding: 0.9rem 1.15rem;
+  text-transform: uppercase;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.contactSubmit button:hover,
+.contactSubmit button:focus-visible {
+  background: transparent;
+  color: var(--color-brand-off-white);
+  outline: none;
+}
+
 .footer {
   align-items: end;
-  bottom: 1.6rem;
   display: grid;
   font-family: var(--font-geist-mono);
   font-size: 0.62rem;
   grid-template-columns: 1fr 1fr auto;
-  left: 1.6rem;
   letter-spacing: 0.04em;
-  position: absolute;
-  right: 1.6rem;
+  margin-top: clamp(6rem, 14vh, 10rem);
   text-transform: uppercase;
 }
 
@@ -377,9 +950,13 @@
     font-size: 0;
   }
 
-  .availability span {
+  .availabilityDot {
     height: 0.6rem;
     width: 0.6rem;
+  }
+
+  .availabilityLabel {
+    display: none;
   }
 
   .hero {
@@ -397,10 +974,19 @@
     display: none;
   }
 
-  .manifesto,
   .services,
   .projects,
   .contact {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+
+  .services {
+    padding-bottom: 5rem;
+  }
+
+  .studioIntro,
+  .studioShowcase {
     padding-left: 1.1rem;
     padding-right: 1.1rem;
   }
@@ -415,38 +1001,263 @@
     grid-template-columns: 1fr;
   }
 
+  .studioIntro {
+    min-height: auto;
+    padding-bottom: 4.5rem;
+    padding-top: 1.25rem;
+  }
+
+  .manifestoContent {
+    align-self: auto;
+    gap: 1.25rem;
+    margin-top: clamp(3.5rem, 14vw, 5rem);
+    width: 100%;
+  }
+
   .manifesto h2 {
-    font-size: clamp(3.2rem, 17vw, 6rem);
+    font-size: clamp(2.55rem, 11.5vw, 4rem);
+    line-height: 0.86;
+  }
+
+  .manifestoContent p {
+    font-size: 0.9rem;
+    max-width: 22rem;
+  }
+
+  .studioShowcase {
+    gap: 1rem;
+    grid-template-rows: auto auto;
+    min-height: auto;
+    padding-bottom: 1.1rem;
+    padding-top: 1.1rem;
+  }
+
+  .studioShowcaseHeader {
+    gap: 1rem;
+    grid-template-columns: 3.5rem 1fr;
+  }
+
+  .studioShowcaseHeader p {
+    grid-column: 2;
+    justify-self: start;
+    max-width: 17rem;
+  }
+
+  .studioScene {
+    height: min(112vw, 32rem);
+    margin-left: -1.1rem;
+    margin-right: -1.1rem;
+    min-height: 0;
+    width: calc(100% + 2.2rem);
+  }
+
+  .studioHint {
+    bottom: 0.7rem;
+    font-size: 0.52rem;
+    line-height: 1.4;
+    max-width: 70%;
+    right: 0.7rem;
+  }
+
+  .desktopHint {
+    display: none;
+  }
+
+  .mobileHint {
+    display: inline;
+  }
+
+  .serviceIntro {
+    align-items: start;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    margin: 3.5rem 0 2.25rem;
+  }
+
+  .serviceIntro h2 {
+    font-size: clamp(2.35rem, 10.5vw, 3.5rem);
+    line-height: 0.86;
+  }
+
+  .serviceIntro > div {
+    gap: 1.1rem;
+  }
+
+  .serviceIntro p {
+    font-size: 0.9rem;
+    max-width: 22rem;
+  }
+
+  .onlineServiceList {
+    grid-template-columns: 1fr;
+  }
+
+  .onlineService {
+    min-height: 0;
+    padding: 1.1rem;
+  }
+
+  .onlineService + .onlineService {
+    border-left: 0;
+    border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  }
+
+  .onlineServiceMeta {
+    gap: 0.75rem;
+    grid-template-columns: 2.5rem 1fr;
+  }
+
+  .onlineService h3 {
+    font-size: clamp(2.2rem, 10.5vw, 3.25rem);
+    margin-top: 2.25rem;
+  }
+
+  .onlineService > p {
+    font-size: 0.86rem;
+  }
+
+  .onlineService ul {
+    margin-top: 2rem;
+  }
+
+  .serviceList {
+    margin-top: 3.5rem;
   }
 
   .service {
     gap: 1rem;
     grid-template-columns: 2.5rem 1fr;
+    padding: 1rem 0 2rem;
   }
 
-  .service p {
+  .service h3 {
+    font-size: clamp(1.8rem, 9vw, 2.6rem);
+  }
+
+  .serviceCopy {
     grid-column: 2;
   }
 
-  .project {
-    grid-template-columns: 2.5rem 1fr auto;
-    padding: 1rem 0;
+  .serviceCopy > p {
+    font-size: 0.86rem;
   }
 
-  .project p,
-  .project time {
+  .serviceAction {
+    align-items: flex-end;
+    margin-top: 1.25rem;
+  }
+
+  .servicePrice strong {
+    font-size: 1.5rem;
+  }
+
+  .quoteButton {
+    font-size: 0.5rem;
+    max-width: 9rem;
+    padding: 0.7rem;
+  }
+
+  .pricingStrip {
+    align-items: start;
+    gap: 0.85rem;
+    grid-template-columns: 1fr;
+    margin-top: 2rem;
+  }
+
+  .pricingStrip p {
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .projects {
+    padding-bottom: 6rem;
+  }
+
+  .projectIntro {
+    gap: 1.25rem;
+    margin: 4rem 0 3rem;
+  }
+
+  .projectIntro h2 {
+    font-size: clamp(2.4rem, 11vw, 3.4rem);
+    line-height: 0.9;
+  }
+
+  .projectBlock + .projectBlock {
+    margin-top: 3rem;
+  }
+
+  .projectList {
+    margin-top: 1.75rem;
+  }
+
+  .projectBlockHeader {
+    gap: 1rem;
+    grid-template-columns: 3.5rem 1fr;
+  }
+
+  .projectBlockHeader p {
+    grid-column: 2;
+    justify-self: start;
+    max-width: 17rem;
+  }
+
+  .projectRow {
+    gap: 0.6rem;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    min-height: 4.75rem;
+    padding: 0.55rem 0;
+  }
+
+  .projectRow > p,
+  .projectRow > span:last-child {
     display: none;
   }
 
-  .projectArrow {
-    grid-column: 3;
+  .contact {
+    min-height: auto;
+    padding-bottom: 1.1rem;
+  }
+
+  .contactContent {
+    margin-top: 5rem;
+  }
+
+  .contactContent a {
+    font-size: clamp(3.5rem, 20vw, 6rem);
+  }
+
+  .contactLayout {
+    gap: 3.5rem;
+    grid-template-columns: 1fr;
+    margin-top: 4.5rem;
+  }
+
+  .contactIntro {
+    gap: 1.25rem;
+  }
+
+  .contactForm {
+    grid-template-columns: 1fr;
+  }
+
+  .contactMessage,
+  .contactSubmit {
+    grid-column: 1;
+  }
+
+  .contactSubmit {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .contactSubmit button {
+    width: 100%;
   }
 
   .footer {
-    bottom: 1.1rem;
     grid-template-columns: 1fr auto;
-    left: 1.1rem;
-    right: 1.1rem;
+    margin-top: 5rem;
   }
 
   .footer span:nth-child(2) {
@@ -462,7 +1273,9 @@
 
   .availability::after,
   .heroMeta a::after,
-  .project,
+  .projectRow,
+  .projectRow::before,
+  .projectRow > span:last-child,
   .contactContent a {
     transition: none;
   }

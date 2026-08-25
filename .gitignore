@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# uncompressed Blender export (the site uses studio_mesh.glb)
+/public/studio.glb
+
 # debug
 npm-debug.log*
 yarn-debug.log*

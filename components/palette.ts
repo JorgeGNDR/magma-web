@@ -1,6 +1,7 @@
 export const brandColors = {
+  complementaryBlue: "#0085E6",
   offWhite: "#e0e0e0",
-  softBlack: "#4a4a4a",
+  softBlack: "#272727",
   magmaOrange: "#e66100",
 } as const;
 

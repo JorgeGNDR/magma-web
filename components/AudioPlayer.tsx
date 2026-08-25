@@ -1,10 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { audioSignal, resetAudioSignal } from "./audioSignal";
+import {
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  AUDIO_BAND_COUNT,
+  audioSignal,
+  resetAudioSignal,
+} from "./audioSignal";
 import styles from "./AudioPlayer.module.css";
 
-const AUDIO_SOURCE = "/audio/justanillusion.mp3";
+const PLAYLIST = [
+  {
+    id: "just-an-illusion",
+    label: "MAGMA — JUST AN ILLUSION",
+    src: "/audio/justanillusion.mp3",
+  },
+  {
+    id: "session-02",
+    label: "MAGMA — SESSION 02",
+    src: "/audio/justanillusion.mp3",
+  },
+  {
+    id: "session-03",
+    label: "MAGMA — SESSION 03",
+    src: "/audio/justanillusion.mp3",
+  },
+] as const;
+
+const LOW_BAND_MIN_HZ = 20;
+const LOW_BAND_MAX_HZ = 120;
+const MAX_ANALYSED_HZ = 16_000;
 
 type PlaybackState = "idle" | "loading" | "playing" | "missing";
 
@@ -15,6 +45,12 @@ type AudioGraph = {
   data: Uint8Array<ArrayBuffer>;
   source: MediaElementAudioSourceNode;
 };
+
+function releaseMouseFocus(event: ReactPointerEvent<HTMLElement>) {
+  if (event.pointerType === "mouse") {
+    event.currentTarget.blur();
+  }
+}
 
 function averageBand(data: Uint8Array<ArrayBuffer>, start: number, end: number) {
   let sum = 0;
@@ -27,8 +63,59 @@ function averageBand(data: Uint8Array<ArrayBuffer>, start: number, end: number) 
   return safeEnd > start ? sum / (safeEnd - start) / 255 : 0;
 }
 
+function frequencyBand(
+  data: Uint8Array<ArrayBuffer>,
+  startHz: number,
+  endHz: number,
+  sampleRate: number,
+  fftSize: number,
+) {
+  const binWidth = sampleRate / fftSize;
+  const startBin = Math.max(1, Math.ceil(startHz / binWidth));
+  const endBin = Math.max(startBin + 1, Math.ceil(endHz / binWidth));
+
+  return averageBand(data, startBin, endBin);
+}
+
+function spatialBand(graph: AudioGraph, bandIndex: number) {
+  if (bandIndex === 0) {
+    return frequencyBand(
+      graph.data,
+      LOW_BAND_MIN_HZ,
+      LOW_BAND_MAX_HZ,
+      graph.context.sampleRate,
+      graph.analyser.fftSize,
+    );
+  }
+
+  const upperFrequency = Math.min(
+    MAX_ANALYSED_HZ,
+    graph.context.sampleRate / 2,
+  );
+  const remainingBandCount = AUDIO_BAND_COUNT - 1;
+  const logarithmicRatio = upperFrequency / LOW_BAND_MAX_HZ;
+  const logarithmicIndex = bandIndex - 1;
+  const startHz =
+    LOW_BAND_MAX_HZ *
+    logarithmicRatio ** (logarithmicIndex / remainingBandCount);
+  const endHz =
+    LOW_BAND_MAX_HZ *
+    logarithmicRatio ** ((logarithmicIndex + 1) / remainingBandCount);
+
+  return frequencyBand(
+    graph.data,
+    startHz,
+    endHz,
+    graph.context.sampleRate,
+    graph.analyser.fftSize,
+  );
+}
+
 export function AudioPlayer() {
+  const [activeTrackIndex, setActiveTrackIndex] = useState(0);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
+  const [progress, setProgress] = useState(0);
+  const activeTrackIndexRef = useRef(0);
   const graphRef = useRef<AudioGraph | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
@@ -54,24 +141,36 @@ export function AudioPlayer() {
       audioSignal.bass += (bass - audioSignal.bass) * 0.34;
       audioSignal.mid += (mid - audioSignal.mid) * 0.24;
       audioSignal.treble += (treble - audioSignal.treble) * 0.2;
-      audioSignal.playing = true;
 
+      for (let index = 0; index < AUDIO_BAND_COUNT; index += 1) {
+        const target = spatialBand(graph, index);
+        const current = audioSignal.bands[index];
+        const response = target > current ? 0.42 : 0.16;
+
+        audioSignal.bands[index] += (target - current) * response;
+      }
+
+      audioSignal.playing = true;
       animationFrameRef.current = window.requestAnimationFrame(analyse);
     };
 
     analyse();
   }
 
-  function createAudioGraph() {
-    const audio = new Audio(AUDIO_SOURCE);
+  function updateProgress(audio: HTMLAudioElement) {
+    const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+    setProgress(duration > 0 ? audio.currentTime / duration : 0);
+  }
+
+  function createAudioGraph(trackIndex = activeTrackIndexRef.current) {
+    const audio = new Audio(PLAYLIST[trackIndex].src);
     const context = new AudioContext();
     const analyser = context.createAnalyser();
     const source = context.createMediaElementSource(audio);
 
-    audio.loop = true;
     audio.preload = "auto";
-    analyser.fftSize = 512;
-    analyser.smoothingTimeConstant = 0.82;
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.68;
     source.connect(analyser);
     analyser.connect(context.destination);
 
@@ -83,8 +182,58 @@ export function AudioPlayer() {
       source,
     };
 
+    audio.addEventListener("timeupdate", () => updateProgress(audio));
+    audio.addEventListener("loadedmetadata", () => updateProgress(audio));
+    audio.addEventListener("ended", () => {
+      const nextTrackIndex =
+        (activeTrackIndexRef.current + 1) % PLAYLIST.length;
+      void loadTrack(nextTrackIndex, true);
+    });
+
     graphRef.current = graph;
     return graph;
+  }
+
+  async function playGraph(graph: AudioGraph) {
+    setPlaybackState("loading");
+
+    try {
+      await graph.context.resume();
+      await graph.audio.play();
+      startAnalysis(graph);
+      setPlaybackState("playing");
+    } catch {
+      stopAnalysis();
+      setPlaybackState("missing");
+    }
+  }
+
+  async function loadTrack(trackIndex: number, shouldPlay: boolean) {
+    const track = PLAYLIST[trackIndex];
+    activeTrackIndexRef.current = trackIndex;
+    setActiveTrackIndex(trackIndex);
+    setProgress(0);
+
+    const existingGraph = graphRef.current;
+    if (!existingGraph) {
+      if (shouldPlay) {
+        await playGraph(createAudioGraph(trackIndex));
+      } else {
+        setPlaybackState("idle");
+      }
+      return;
+    }
+
+    existingGraph.audio.pause();
+    stopAnalysis();
+    existingGraph.audio.src = track.src;
+    existingGraph.audio.load();
+
+    if (shouldPlay) {
+      await playGraph(existingGraph);
+    } else {
+      setPlaybackState("idle");
+    }
   }
 
   async function togglePlayback() {
@@ -97,18 +246,16 @@ export function AudioPlayer() {
       return;
     }
 
-    setPlaybackState("loading");
     const graph = currentGraph ?? createAudioGraph();
+    await playGraph(graph);
+  }
 
-    try {
-      await graph.context.resume();
-      await graph.audio.play();
-      startAnalysis(graph);
-      setPlaybackState("playing");
-    } catch {
-      stopAnalysis();
-      setPlaybackState("missing");
-    }
+  function seek(nextProgress: number) {
+    const graph = graphRef.current;
+    if (!graph || !Number.isFinite(graph.audio.duration)) return;
+
+    graph.audio.currentTime = graph.audio.duration * nextProgress;
+    setProgress(nextProgress);
   }
 
   useEffect(() => {
@@ -126,32 +273,81 @@ export function AudioPlayer() {
   }, []);
 
   const isPlaying = playbackState === "playing";
-  const label =
+  const statusLabel =
     playbackState === "missing"
       ? "TRACK MISSING"
       : playbackState === "loading"
         ? "LOADING"
-        : isPlaying
-          ? "PAUSE"
-          : "PRESS PLAY";
+        : null;
+  const progressStyle = {
+    "--audio-progress": `${progress * 100}%`,
+  } as CSSProperties;
 
   return (
-    <button
-      aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
-      aria-pressed={isPlaying}
-      className={styles.player}
-      data-state={playbackState}
-      onClick={togglePlayback}
-      type="button"
-    >
-      <span className={styles.icon} aria-hidden="true">
-        {isPlaying ? (
-          <span className={styles.pauseIcon} />
-        ) : (
-          <span className={styles.playIcon} />
-        )}
-      </span>
-      <span>{label}</span>
-    </button>
+    <div className={styles.playerShell} data-playing={isPlaying}>
+      <div className={styles.compactRow}>
+        <div className={styles.progressSlot} aria-hidden={!isPlaying}>
+          <input
+            aria-label="Progreso de la canción"
+            className={styles.progress}
+            max={1}
+            min={0}
+            onChange={(event) => seek(Number(event.currentTarget.value))}
+            onPointerUp={releaseMouseFocus}
+            step={0.001}
+            style={progressStyle}
+            tabIndex={isPlaying ? 0 : -1}
+            type="range"
+            value={progress}
+          />
+        </div>
+
+        <button
+          aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
+          aria-pressed={isPlaying}
+          className={styles.transport}
+          data-state={playbackState}
+          onClick={() => void togglePlayback()}
+          onPointerUp={releaseMouseFocus}
+          type="button"
+        >
+          <span className={styles.icon} aria-hidden="true">
+            <span className={styles.transportShape} />
+          </span>
+          <span
+            className={styles.labelViewport}
+            data-status={statusLabel ? "true" : "false"}
+          >
+            <span className={styles.labelRail}>
+              <span>PRESS PLAY</span>
+              <span>PRESS PAUSE</span>
+            </span>
+            {statusLabel ? (
+              <span className={styles.statusLabel}>{statusLabel}</span>
+            ) : null}
+          </span>
+        </button>
+      </div>
+
+      <div className={styles.playlist} aria-label="Playlist de MAGMA">
+        {PLAYLIST.map((track, trackIndex) => (
+          <button
+            aria-current={
+              trackIndex === activeTrackIndex ? "true" : undefined
+            }
+            className={styles.track}
+            data-active={trackIndex === activeTrackIndex}
+            key={track.id}
+            onClick={() =>
+              void loadTrack(trackIndex, playbackState === "playing")
+            }
+            onPointerUp={releaseMouseFocus}
+            type="button"
+          >
+            {track.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
