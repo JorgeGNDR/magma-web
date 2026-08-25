@@ -28,8 +28,12 @@ html {
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-geist-sans), Arial, sans-serif;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {

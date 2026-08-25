@@ -44,6 +44,8 @@ function bandCentroid(start: number, end: number) {
   return energySum > 0.0001 ? weightedSum / energySum : 0.5;
 }
 
+/* Three.js animation is intentionally imperative inside useFrame. */
+/* eslint-disable react-hooks/immutability */
 function ReactiveLights() {
   const ambientLightRef = useRef<THREE.AmbientLight>(null);
   const keyLightRef = useRef<THREE.DirectionalLight>(null);
@@ -196,6 +198,7 @@ function ReactiveLights() {
     </>
   );
 }
+/* eslint-enable react-hooks/immutability */
 
 export function LogoScene() {
   return (
