@@ -37,42 +37,43 @@ const STUDIO_LIGHT_CONFIG = {
   hemisphereIntensity: 0.65,
   keyIntensity: 2.65,
 } as const;
-const STUDIO_ROTATION_SPEED = 0.042;
+const STUDIO_ROTATION_SPEED = 0.018;
 const STUDIO_FOCUS_DURATION = 0.72;
 const STUDIO_INITIAL_FIT_MARGIN = 0.92;
 const STUDIO_MOBILE_FIT_MARGIN = 0.74;
-const STUDIO_MIN_ZOOM = 60;
-const STUDIO_MAX_ZOOM = 360;
+const STUDIO_MIN_ZOOM = 100;
+const STUDIO_MAX_ZOOM = 700;
 const STUDIO_ZOOM_STEP = 1.2;
 const STUDIO_RENDER_QUALITY = {
   mobile: {
     id: "mobile",
-    initialDpr: 1,
+    initialDpr: 1.15,
     initialFactor: 0.3,
-    maxDpr: 1.35,
+    maxDpr: 1.5,
     minDpr: 0.85,
   },
   retina: {
     id: "retina",
-    initialDpr: 1.75,
+    initialDpr: 2,
     initialFactor: 1,
-    maxDpr: 1.75,
-    minDpr: 1,
+    maxDpr: 2,
+    minDpr: 1.25,
   },
   standard: {
     id: "standard",
-    initialDpr: 1.25,
+    initialDpr: 1.5,
     initialFactor: 0.5,
-    maxDpr: 1.5,
+    maxDpr: 1.75,
     minDpr: 1,
   },
 } as const;
 type StudioRenderQualityProfile =
   (typeof STUDIO_RENDER_QUALITY)[keyof typeof STUDIO_RENDER_QUALITY];
-const MOBILE_EQUIPMENT_PULSE = {
-  maxIntensity: 0.68,
-  minIntensity: 0.06,
-  speed: 2.4,
+const EQUIPMENT_PULSE = {
+  cycleDuration: 8,
+  maxIntensity: 0.2,
+  minIntensity: 0,
+  pulseDuration: 1.5,
 } as const;
 
 function getStudioRenderQualityProfile(): StudioRenderQualityProfile {
@@ -113,7 +114,9 @@ type EquipmentSelection = {
 type EquipmentInfo = {
   category: string;
   description: string;
+  focusBoundsNames?: readonly string[];
   focusScale: number;
+  focusTargetNames?: readonly string[];
   index: string;
   rootNames: readonly string[];
   title: string;
@@ -166,6 +169,7 @@ const EQUIPMENT: Record<EquipmentId, EquipmentInfo> = {
     category: "Monitores de estudio",
     description:
       "La pareja principal para tomar decisiones de balance, profundidad y traducción durante la mezcla.",
+    focusBoundsNames: ["Legacy_Calibre.001", "Legacy_Calibre.003"],
     focusScale: 0.72,
     index: "02",
     rootNames: [
@@ -197,6 +201,7 @@ const EQUIPMENT: Record<EquipmentId, EquipmentInfo> = {
     description:
       "Dos opciones complementarias para voces e instrumentos: AKG C214 y Aston Spirit.",
     focusScale: 0.62,
+    focusTargetNames: ["membrane"],
     index: "05",
     rootNames: ["Mic body"],
     title: "AKG C214 + Aston Spirit",
@@ -220,6 +225,20 @@ function findEquipmentRoot(
   });
 
   return equipmentRoot;
+}
+
+function getEquipmentFocusName(
+  equipment: EquipmentInfo,
+  rootKey: string,
+  names?: readonly string[],
+) {
+  if (!names) return null;
+
+  const rootIndex = equipment.rootNames.findIndex(
+    (rootName) => normalizeObjectName(rootName) === rootKey,
+  );
+
+  return rootIndex >= 0 ? names[rootIndex] ?? null : null;
 }
 
 function getEquipmentHitAreaBox(
@@ -510,12 +529,33 @@ function InteractiveStudioModel({
 
     if (selection) {
       rotationGroup.updateWorldMatrix(true, true);
+      const equipment = EQUIPMENT[selection.id];
       const equipmentRoot = findEquipmentRoot(model, selection.rootKey);
 
       if (equipmentRoot) {
-        const focusBox = new THREE.Box3().setFromObject(equipmentRoot);
-        const center = focusBox.getCenter(new THREE.Vector3());
-        const focusScale = EQUIPMENT[selection.id].focusScale;
+        const focusBoundsName = getEquipmentFocusName(
+          equipment,
+          selection.rootKey,
+          equipment.focusBoundsNames,
+        );
+        const focusTargetName = getEquipmentFocusName(
+          equipment,
+          selection.rootKey,
+          equipment.focusTargetNames,
+        );
+        const focusBoundsRoot = focusBoundsName
+          ? findEquipmentRoot(model, normalizeObjectName(focusBoundsName)) ??
+            equipmentRoot
+          : equipmentRoot;
+        const focusTargetRoot = focusTargetName
+          ? findEquipmentRoot(model, normalizeObjectName(focusTargetName)) ??
+            focusBoundsRoot
+          : focusBoundsRoot;
+        const focusBox = new THREE.Box3().setFromObject(focusBoundsRoot);
+        const center = new THREE.Box3()
+          .setFromObject(focusTargetRoot)
+          .getCenter(new THREE.Vector3());
+        const focusScale = equipment.focusScale;
         const offset = center.clone().sub(activeControls.target);
         const focusPosition = activeCamera.position.clone().add(offset);
 
@@ -718,18 +758,18 @@ function StudioModel({
       }),
     [],
   );
-  const mobilePulseMaterial = useMemo(
+  const equipmentPulseMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: brandColors.offWhite,
         emissive: brandColors.magmaOrange,
-        emissiveIntensity: MOBILE_EQUIPMENT_PULSE.minIntensity,
+        emissiveIntensity: EQUIPMENT_PULSE.minIntensity,
         metalness: 0,
         roughness: 0.52,
       }),
     [],
   );
-  const mobilePulseMaterialRef = useRef(mobilePulseMaterial);
+  const equipmentPulseMaterialRef = useRef(equipmentPulseMaterial);
   const model = useMemo(() => {
     const clone = scene.clone(true);
 
@@ -745,16 +785,21 @@ function StudioModel({
   }, [scene, whiteMaterial]);
 
   useFrame(({ clock }) => {
-    if (!isMobile) return;
-
+    const cycleTime = clock.elapsedTime % EQUIPMENT_PULSE.cycleDuration;
+    const pulseProgress = THREE.MathUtils.clamp(
+      cycleTime / EQUIPMENT_PULSE.pulseDuration,
+      0,
+      1,
+    );
     const pulse =
-      (Math.sin(clock.elapsedTime * MOBILE_EQUIPMENT_PULSE.speed) + 1) / 2;
-    const easedPulse = pulse * pulse * (3 - 2 * pulse);
+      cycleTime < EQUIPMENT_PULSE.pulseDuration
+        ? Math.sin(pulseProgress * Math.PI) ** 2
+        : 0;
 
-    mobilePulseMaterialRef.current.emissiveIntensity = THREE.MathUtils.lerp(
-      MOBILE_EQUIPMENT_PULSE.minIntensity,
-      MOBILE_EQUIPMENT_PULSE.maxIntensity,
-      easedPulse,
+    equipmentPulseMaterialRef.current.emissiveIntensity = THREE.MathUtils.lerp(
+      EQUIPMENT_PULSE.minIntensity,
+      EQUIPMENT_PULSE.maxIntensity,
+      pulse,
     );
   });
 
@@ -763,22 +808,20 @@ function StudioModel({
       if (child instanceof THREE.Mesh) child.material = whiteMaterial;
     });
 
-    if (isMobile) {
-      Object.values(EQUIPMENT).forEach((equipment) => {
-        equipment.rootNames.forEach((rootName) => {
-          const equipmentRoot = findEquipmentRoot(
-            model,
-            normalizeObjectName(rootName),
-          );
+    Object.values(EQUIPMENT).forEach((equipment) => {
+      equipment.rootNames.forEach((rootName) => {
+        const equipmentRoot = findEquipmentRoot(
+          model,
+          normalizeObjectName(rootName),
+        );
 
-          equipmentRoot?.traverse((child) => {
-            if (child instanceof THREE.Mesh) {
-              child.material = mobilePulseMaterial;
-            }
-          });
+        equipmentRoot?.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.material = equipmentPulseMaterial;
+          }
         });
       });
-    }
+    });
 
     const activeEquipment = hoveredEquipment ?? selection;
     if (!activeEquipment) return;
@@ -796,8 +839,7 @@ function StudioModel({
   }, [
     highlightedMaterial,
     hoveredEquipment,
-    isMobile,
-    mobilePulseMaterial,
+    equipmentPulseMaterial,
     model,
     selection,
     whiteMaterial,
@@ -805,11 +847,11 @@ function StudioModel({
 
   useEffect(
     () => () => {
+      equipmentPulseMaterial.dispose();
       highlightedMaterial.dispose();
-      mobilePulseMaterial.dispose();
       whiteMaterial.dispose();
     },
-    [highlightedMaterial, mobilePulseMaterial, whiteMaterial],
+    [equipmentPulseMaterial, highlightedMaterial, whiteMaterial],
   );
 
   return (

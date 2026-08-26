@@ -27,15 +27,6 @@ const primaryServices = [
       "3 cambios incluidos",
       "Entrega de distintas versiones",
     ],
-    price: "Desde 40 €",
-    rates: [
-      { label: "Hasta 4 pistas", price: "40 €" },
-      { label: "Hasta 8 pistas", price: "70 €" },
-      { label: "Hasta 16 pistas", price: "110 €" },
-      { label: "Hasta 24 pistas", price: "150 €" },
-      { label: "Hasta 32 pistas", price: "190 €" },
-    ],
-    unit: "según número de pistas",
   },
   {
     number: "02",
@@ -48,8 +39,6 @@ const primaryServices = [
       "Optimización para plataformas digitales",
       "Equilibrio y presencia",
     ],
-    price: "Desde 25 €",
-    unit: "por canción",
   },
 ] as const;
 
@@ -59,55 +48,54 @@ const studioServices = [
     title: "Producción musical",
     description:
       "Desarrollamos el lenguaje del proyecto desde la primera idea, trabajando estructura, sonido y dirección hasta encontrar una identidad propia.",
-    price: "Desde 200 €",
     scope: "Composición · Arreglos · Diseño sonoro",
-    unit: "por canción",
   },
   {
     number: "04",
     title: "Grabación",
     description:
       "Grabamos voces e instrumentos con una cadena cuidada y una dirección centrada en conseguir la interpretación adecuada para cada canción.",
-    price: "40 €",
     scope: "Voces · Instrumentos · Edición",
-    unit: "por hora",
   },
   {
     number: "05",
     title: "Sesiones de estudio",
     description:
       "Reserva el espacio para producir, escribir, experimentar o avanzar tu proyecto con acompañamiento técnico y creativo cuando lo necesites.",
-    price: "Desde 30 €",
     scope: "Por horas · Media jornada · Jornada completa",
-    unit: "por hora",
   },
   {
     number: "06",
     title: "Pack completo",
     description:
       "Un proceso integral para desarrollar y terminar una canción o proyecto dentro de una misma visión, desde la idea inicial hasta la entrega final.",
-    price: "Desde 350 €",
     scope: "Producción · Grabación · Mezcla · Mastering",
-    unit: "por canción",
   },
   {
     number: "07",
     title: "Pack grabación + mezcla + mastering",
     description:
       "Grabamos el proyecto en el estudio y continuamos el proceso hasta conseguir una mezcla terminada y un máster listo para su distribución.",
-    price: "Desde 120 €",
     scope: "1 h 30 min de grabación · Mezcla · Mastering",
-    unit: "por canción",
   },
   {
     number: "08",
     title: "Pack mezcla + mastering",
     description:
       "Trabajamos la mezcla y el acabado final como un único proceso para mantener la coherencia, el carácter y el impacto de la canción.",
-    price: "Desde 60 €",
     scope: "Mezcla · Mastering",
-    unit: "por canción",
   },
+] as const;
+
+const tickerItems = [
+  "Producción",
+  "Grabación",
+  "Mezcla",
+  "Mastering",
+  "Producción",
+  "Grabación",
+  "Mezcla",
+  "Mastering",
 ] as const;
 
 const featuredProjects = [
@@ -228,37 +216,15 @@ export default function Home() {
           </div>
         </section>
 
-        <section className={styles.manifesto} id="estudio">
-          <div className={styles.studioIntro}>
+        <section
+          aria-labelledby="studio-title"
+          className={styles.manifesto}
+          id="estudio"
+        >
+          <div className={styles.studioShowcase}>
             <div className={styles.sectionLabel}>
               <span>(01)</span>
-              <span>El estudio</span>
-            </div>
-
-            <div className={styles.manifestoContent}>
-              <h2>
-                El sonido no
-                <br />
-                se decora.
-                <br />
-                Se construye.
-              </h2>
-              <p>
-                Trabajamos con todo tipo de artistas y proyectos que buscan un
-                buen sonido. Desde la primera idea hasta el
-                master_final_finalfinal.wav.
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.studioShowcase}>
-            <div className={styles.studioShowcaseHeader}>
-              <span>(01—B)</span>
-              <h3>Las instalaciones</h3>
-              <p>
-                Explora el espacio donde producimos, grabamos y mezclamos cada
-                proyecto.
-              </p>
+              <h2 id="studio-title">El estudio</h2>
             </div>
 
             <div
@@ -280,15 +246,17 @@ export default function Home() {
         </section>
 
         <div className={styles.ticker} aria-hidden="true">
-          <div>
-            <span>Producción</span>
-            <span>Grabación</span>
-            <span>Mezcla</span>
-            <span>Mastering</span>
-            <span>Producción</span>
-            <span>Grabación</span>
-            <span>Mezcla</span>
-            <span>Mastering</span>
+          <div className={styles.tickerTrack}>
+            <div className={styles.tickerGroup}>
+              {tickerItems.map((item, index) => (
+                <span key={`${item}-${index}`}>{item}</span>
+              ))}
+            </div>
+            <div className={styles.tickerGroup}>
+              {tickerItems.map((item, index) => (
+                <span key={`${item}-duplicate-${index}`}>{item}</span>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -339,10 +307,6 @@ export default function Home() {
                 </ul>
 
                 <div className={styles.serviceAction}>
-                  <p className={styles.servicePrice}>
-                    <strong>{service.price}</strong>
-                    <span>{service.unit}</span>
-                  </p>
                   <a
                     className={styles.quoteButton}
                     href={getQuoteHref(service.title)}
@@ -350,23 +314,6 @@ export default function Home() {
                     Solicitar presupuesto ↗
                   </a>
                 </div>
-
-                {"rates" in service && (
-                  <details className={styles.serviceRates}>
-                    <summary>
-                      <span>Ver tarifas por pistas</span>
-                      <span aria-hidden="true">+</span>
-                    </summary>
-                    <dl>
-                      {service.rates.map((rate) => (
-                        <div key={rate.label}>
-                          <dt>{rate.label}</dt>
-                          <dd>{rate.price}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </details>
-                )}
               </article>
             ))}
           </div>
@@ -381,10 +328,6 @@ export default function Home() {
                   <span>{service.scope}</span>
 
                   <div className={styles.serviceAction}>
-                    <p className={styles.servicePrice}>
-                      <strong>{service.price}</strong>
-                      <span>{service.unit}</span>
-                    </p>
                     <a
                       className={styles.quoteButton}
                       href={getQuoteHref(service.title)}
@@ -396,18 +339,6 @@ export default function Home() {
               </article>
             ))}
           </div>
-
-          <div className={styles.pricingStrip}>
-            <span>Tarifas por volumen</span>
-            <p>
-              <strong>EP · 3–6 canciones: −10%</strong>
-              <strong>Álbum · 7 o más: −15%</strong>
-            </p>
-            <small>
-              Precios mínimos orientativos. El presupuesto final depende del
-              alcance y del estado del material.
-            </small>
-          </div>
         </section>
 
         <section className={styles.projects} id="proyectos">
@@ -417,7 +348,7 @@ export default function Home() {
           </div>
 
           <div className={styles.projectIntro}>
-            <h2>Temas que hemos hecho.</h2>
+            <h2>Trabajos que hemos hecho.</h2>
             <p>
               Una selección de proyectos construidos en el estudio.
             </p>
@@ -564,20 +495,6 @@ export default function Home() {
                   <option>Sesión de estudio</option>
                   <option>Pack completo</option>
                   <option>Otro</option>
-                </select>
-              </div>
-
-              <div className={styles.contactField}>
-                <label htmlFor="contact-budget">Presupuesto aproximado</label>
-                <select defaultValue="" id="contact-budget" name="presupuesto">
-                  <option disabled value="">
-                    Selecciona un rango
-                  </option>
-                  <option>Menos de 100 €</option>
-                  <option>100–250 €</option>
-                  <option>250–500 €</option>
-                  <option>Más de 500 €</option>
-                  <option>Por definir</option>
                 </select>
               </div>
 
