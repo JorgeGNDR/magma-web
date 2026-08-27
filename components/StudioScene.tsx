@@ -42,7 +42,8 @@ const STUDIO_FOCUS_DURATION = 0.72;
 const STUDIO_INITIAL_FIT_MARGIN = 0.92;
 const STUDIO_MOBILE_FIT_MARGIN = 0.74;
 const STUDIO_MIN_ZOOM = 100;
-const STUDIO_MAX_ZOOM = 700;
+const STUDIO_BASE_MAX_ZOOM = 700;
+const STUDIO_MAX_ZOOM = 800;
 const STUDIO_ZOOM_STEP = 1.2;
 const STUDIO_RENDER_QUALITY = {
   mobile: {
@@ -117,6 +118,7 @@ type EquipmentInfo = {
   focusBoundsNames?: readonly string[];
   focusScale: number;
   focusTargetNames?: readonly string[];
+  focusZoomMultiplier?: number;
   index: string;
   rootNames: readonly string[];
   title: string;
@@ -160,7 +162,7 @@ const EQUIPMENT: Record<EquipmentId, EquipmentInfo> = {
     category: "Interfaz de audio USB",
     description:
       "Interfaz de escritorio con dos previos SSL, conversión a 24-bit/192 kHz y modo Legacy 4K. Centraliza la grabación, la monitorización y las mezclas de auriculares del estudio.",
-    focusScale: 0.68,
+    focusScale: 0.62,
     index: "01",
     rootNames: ["SSL_2_PLUS"],
     title: "Solid State Logic SSL 2+",
@@ -170,7 +172,8 @@ const EQUIPMENT: Record<EquipmentId, EquipmentInfo> = {
     description:
       "La pareja principal para tomar decisiones de balance, profundidad y traducción durante la mezcla.",
     focusBoundsNames: ["Legacy_Calibre.001", "Legacy_Calibre.003"],
-    focusScale: 0.72,
+    focusScale: 1.10,
+    focusZoomMultiplier: 0.64,
     index: "02",
     rootNames: [
       "Hi-Fi Monitor Black Wood.001",
@@ -182,7 +185,7 @@ const EQUIPMENT: Record<EquipmentId, EquipmentInfo> = {
     category: "Auriculares abiertos",
     description:
       "Una segunda referencia para edición, mezcla y comprobación detallada fuera de los monitores.",
-    focusScale: 0.66,
+    focusScale: 0.62,
     index: "03",
     rootNames: ["Retro Audiophile Headphones"],
     title: "Beyerdynamic DT 990 Pro",
@@ -191,7 +194,7 @@ const EQUIPMENT: Record<EquipmentId, EquipmentInfo> = {
     category: "Auriculares cerrados",
     description:
       "Una referencia directa y aislada para grabación, edición y control de graves sin depender de la acústica de la sala.",
-    focusScale: 0.66,
+    focusScale: 0.62,
     index: "04",
     rootNames: ["Retro Audiophile Headphones.001"],
     title: "Audio-Technica ATH-M50x",
@@ -200,8 +203,9 @@ const EQUIPMENT: Record<EquipmentId, EquipmentInfo> = {
     category: "Micrófonos de condensador",
     description:
       "Dos opciones complementarias para voces e instrumentos: AKG C214 y Aston Spirit.",
-    focusScale: 0.62,
+    focusScale: 0.56,
     focusTargetNames: ["membrane"],
+    focusZoomMultiplier: 1.1,
     index: "05",
     rootNames: ["Mic body"],
     title: "AKG C214 + Aston Spirit",
@@ -312,6 +316,89 @@ function EquipmentCard({
   );
 }
 
+function AdaptiveEquipmentCard({
+  canvas,
+  equipment,
+  onClose,
+}: {
+  canvas: HTMLCanvasElement;
+  equipment: EquipmentInfo;
+  onClose: () => void;
+}) {
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const positionerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let animationFrame = 0;
+
+    const updatePosition = () => {
+      const anchor = anchorRef.current;
+      const positioner = positionerRef.current;
+      const card = positioner?.firstElementChild;
+
+      if (anchor && positioner && card instanceof HTMLElement) {
+        const viewport = canvas.getBoundingClientRect();
+        const anchorBounds = anchor.getBoundingClientRect();
+        const cardBounds = card.getBoundingClientRect();
+
+        if (cardBounds.width && cardBounds.height) {
+          const margin = Math.max(12, Math.min(20, viewport.width * 0.015));
+          const gap = Math.max(88, Math.min(140, viewport.width * 0.1));
+          const anchorX = anchorBounds.left + anchorBounds.width / 2;
+          const anchorY = anchorBounds.top + anchorBounds.height / 2;
+          const availableRight = viewport.right - margin - anchorX - gap;
+          const availableLeft = anchorX - gap - (viewport.left + margin);
+          const side =
+            availableRight >= cardBounds.width || availableRight >= availableLeft
+              ? "right"
+              : "left";
+          const preferredLeft =
+            side === "right"
+              ? anchorX + gap
+              : anchorX - gap - cardBounds.width;
+          const minimumLeft = viewport.left + margin;
+          const maximumLeft = Math.max(
+            minimumLeft,
+            viewport.right - margin - cardBounds.width,
+          );
+          const minimumTop = viewport.top + margin;
+          const maximumTop = Math.max(
+            minimumTop,
+            viewport.bottom - margin - cardBounds.height,
+          );
+          const cardLeft = THREE.MathUtils.clamp(
+            preferredLeft,
+            minimumLeft,
+            maximumLeft,
+          );
+          const cardTop = THREE.MathUtils.clamp(
+            anchorY - cardBounds.height / 2,
+            minimumTop,
+            maximumTop,
+          );
+
+          positioner.dataset.side = side;
+          positioner.style.transform = `translate3d(${cardLeft - anchorX}px, ${cardTop - anchorY}px, 0)`;
+        }
+      }
+
+      animationFrame = window.requestAnimationFrame(updatePosition);
+    };
+
+    animationFrame = window.requestAnimationFrame(updatePosition);
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [canvas]);
+
+  return (
+    <div className={styles.equipmentCardAnchor} ref={anchorRef}>
+      <div className={styles.equipmentCardPositioner} ref={positionerRef}>
+        <EquipmentCard equipment={equipment} onClose={onClose} />
+      </div>
+    </div>
+  );
+}
+
 type StudioModelProps = {
   hoveredEquipment: EquipmentSelection | null;
   isSceneVisible: boolean;
@@ -410,7 +497,7 @@ function calculateFocusZoom(
   return THREE.MathUtils.clamp(
     fittedZoom / focusScale,
     STUDIO_MIN_ZOOM,
-    STUDIO_MAX_ZOOM,
+    STUDIO_BASE_MAX_ZOOM,
   );
 }
 
@@ -423,7 +510,7 @@ function InteractiveStudioModel({
   selection,
 }: InteractiveStudioModelProps) {
   const bounds = useBounds();
-  const { camera, controls } = useThree();
+  const { camera, controls, gl } = useThree();
   const cameraRef = useRef(camera);
   const controlsRef = useRef<StudioOrbitControls | null>(
     controls as StudioOrbitControls | null,
@@ -556,8 +643,20 @@ function InteractiveStudioModel({
           .setFromObject(focusTargetRoot)
           .getCenter(new THREE.Vector3());
         const focusScale = equipment.focusScale;
+        const focusZoomMultiplier = equipment.focusZoomMultiplier ?? 1;
         const offset = center.clone().sub(activeControls.target);
         const focusPosition = activeCamera.position.clone().add(offset);
+        const focusZoom = THREE.MathUtils.clamp(
+          calculateFocusZoom(
+            activeCamera,
+            focusBox,
+            focusPosition,
+            center,
+            focusScale,
+          ) * focusZoomMultiplier,
+          STUDIO_MIN_ZOOM,
+          STUDIO_MAX_ZOOM,
+        );
 
         if (!hadSelectionRef.current) {
           returnViewRef.current = {
@@ -577,13 +676,7 @@ function InteractiveStudioModel({
           to: {
             position: focusPosition,
             target: center,
-            zoom: calculateFocusZoom(
-              activeCamera,
-              focusBox,
-              focusPosition,
-              center,
-              focusScale,
-            ),
+            zoom: focusZoom,
           },
         };
         hadSelectionRef.current = true;
@@ -712,12 +805,11 @@ function InteractiveStudioModel({
                   style={{ pointerEvents: "none" }}
                   zIndexRange={[10, 10]}
                 >
-                  <div className={styles.equipmentCardPositioner}>
-                    <EquipmentCard
-                      equipment={equipment}
-                      onClose={onClearSelection}
-                    />
-                  </div>
+                  <AdaptiveEquipmentCard
+                    canvas={gl.domElement}
+                    equipment={equipment}
+                    onClose={onClearSelection}
+                  />
                 </Html>
               );
             })}

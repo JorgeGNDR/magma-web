@@ -52,9 +52,17 @@
   outline: none;
 }
 
+.equipmentCardAnchor {
+  height: 0;
+  position: relative;
+  width: 0;
+}
+
 .equipmentCardPositioner {
   pointer-events: none;
+  position: absolute;
   transform: translate(clamp(2.75rem, 6vw, 6rem), -50%);
+  will-change: transform;
 }
 
 .equipmentCard {

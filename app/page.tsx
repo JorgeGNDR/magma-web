@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { LogoScene } from "@/components/LogoScene";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -98,31 +99,22 @@ const tickerItems = [
   "Mastering",
 ] as const;
 
-const featuredProjects = [
-  {
-    artist: "D.Valentino, Wachu",
-    date: "2022-02-14",
-    dateLabel: "14.02.2022",
-    href: "https://open.spotify.com/track/3CJyhIkNCDZqltCWkPlzUP",
-    service: "Producción",
-    title: "Ohh She",
-  },
+const projects = [
   {
     artist: "Wachu",
     date: "2026-05-14",
     dateLabel: "14.05.2026",
     href: "https://open.spotify.com/album/1mRZhfBK8j1wv3NHB5aWL4",
+    image: "/projects/exploit.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "EXPLOIT",
   },
-] as const;
-
-const latestProjects = [
   {
     artist: "Rever, Wachu",
     date: "2026-07-10",
     dateLabel: "10.07.2026",
     href: "https://open.spotify.com/track/78iB1CQ5KaQXwqseyLEz27",
+    image: "/projects/muevelo.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "MUEVELO",
   },
@@ -131,23 +123,35 @@ const latestProjects = [
     date: "2026-06-10",
     dateLabel: "10.06.2026",
     href: "https://open.spotify.com/track/7j2mS1rUsR1jLQKDQIymos",
+    image: "/projects/hacerlo-asi.jpg",
     service: "Grabación",
-    title: "hacerlo asi",
+    title: "hacerlo así",
   },
   {
     artist: "LukaTony",
     date: "2026-06-05",
     dateLabel: "05.06.2026",
     href: "https://open.spotify.com/album/4GT7gvHB4ebmuyg1ihii33",
-    service: "Producción · Grabación · Mezcla · Mastering",
+    image: "/projects/slalom.jpg",
+    service: "Grabación · Mezcla · Mastering",
     title: "SLALOM",
+  },
+  {
+    artist: "Vitala",
+    date: "2026-04-02",
+    dateLabel: "02.04.2026",
+    href: "https://open.spotify.com/track/6QMXsxNJ7ZSosdnI0dtpRR",
+    image: "/projects/ya-no.jpg",
+    service: "Mezcla · Mastering",
+    title: "Ya no...",
   },
   {
     artist: "Rever, Devonté, Wachu",
     date: "2026-03-25",
     dateLabel: "25.03.2026",
     href: "https://open.spotify.com/track/01fCWxTX4bdYyXFhuaUn75",
-    service: "Producción · Grabación · Mezcla · Mastering",
+    image: "/projects/cuando-nos-mentimos.jpg",
+    service: "Producción · Mezcla · Mastering",
     title: "Cuando nos mentimos",
   },
   {
@@ -155,34 +159,38 @@ const latestProjects = [
     date: "2025-12-18",
     dateLabel: "18.12.2025",
     href: "https://open.spotify.com/track/5U4Jz9wK5IGT6Pv8CFkFub",
+    image: "/projects/cuando-te-veo.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "Cuando te veo",
   },
   {
-    artist: "Gratto",
-    date: "2025-08-04",
-    dateLabel: "04.08.2025",
-    href: "https://open.spotify.com/album/3WjbGQYwMKQLLQ8kRcM5hO",
-    service: "Producción · Grabación · Mezcla · Mastering",
-    title: "FLORES GAMMA",
-  },
-  {
-    artist: "Rever, Vitala",
-    date: "2025-07-30",
-    dateLabel: "30.07.2025",
-    href: "https://open.spotify.com/track/44cZfz7biVl0WUTCVHtcu9",
-    service: "Mezcla · Mastering",
-    title: "Después del ruido — Vitala Remix",
-  },
-  {
-    artist: "BabyGoat",
-    date: "2024-08-15",
-    dateLabel: "15.08.2024",
-    href: "https://open.spotify.com/album/5BjTu1QmuLZID7YIlZh5Xj",
+    artist: "Rever",
+    date: "2025-11-26",
+    dateLabel: "26.11.2025",
+    href: "https://open.spotify.com/album/2DR9ZmoOEYzX0pmV6C1x0b",
+    image: "/projects/sin-luz.jpg",
     service: "Grabación · Mezcla · Mastering",
-    title: "LA*WAVE",
+    title: "Sin luz",
   },
-] as const;
+  {
+    artist: "Rever, Wachu",
+    date: "2025-10-30",
+    dateLabel: "30.10.2025",
+    href: "https://open.spotify.com/track/0XMseX9Iomuwt8Dg8kb9Dc",
+    image: "/projects/siempre-es-tarde.jpg",
+    service: "Producción · Grabación · Mezcla · Mastering",
+    title: "Siempre es tarde",
+  },
+  {
+    artist: "Mushkilla, Wachu, Vitala",
+    date: "2025-09-24",
+    dateLabel: "24.09.2025",
+    href: "https://open.spotify.com/track/78HYzb9mMmAlu23NDLhxud",
+    image: "/projects/club-one.jpg",
+    service: "Producción · Grabación · Mezcla · Mastering",
+    title: "Club One",
+  },
+].sort((projectA, projectB) => projectB.date.localeCompare(projectA.date));
 
 export default function Home() {
   return (
@@ -221,43 +229,47 @@ export default function Home() {
           className={styles.manifesto}
           id="estudio"
         >
-          <div className={styles.studioShowcase}>
-            <div className={styles.sectionLabel}>
-              <span>(01)</span>
-              <h2 id="studio-title">El estudio</h2>
-            </div>
+            <div className={styles.studioShowcase}>
+              <div className={styles.sectionLabel}>
+                <span>(01)</span>
+                <span>El estudio</span>
+              </div>
 
-            <div
-              aria-label="Vista tridimensional interactiva del estudio MAGMA"
-              className={styles.studioScene}
-              role="application"
-            >
-              <StudioScene />
-              <p className={styles.studioHint}>
-                <span className={styles.desktopHint}>
-                  Arrastra para girar · ⌥ + scroll para zoom · Clica un equipo
-                </span>
-                <span className={styles.mobileHint}>
-                  Arrastra para girar · Pellizca para zoom · Toca un equipo
-                </span>
-              </p>
+              <h2 className={styles.studioTitle} id="studio-title">
+                Nuestro equipo
+              </h2>
+
+              <div
+                aria-label="Vista tridimensional interactiva del estudio MAGMA"
+                className={styles.studioScene}
+                role="application"
+              >
+                <StudioScene />
+                <p className={styles.studioHint}>
+                  <span className={styles.desktopHint}>
+                    Arrastra para girar · ⌥ + scroll para zoom · Clica un equipo
+                  </span>
+                  <span className={styles.mobileHint}>
+                    Arrastra para girar · Pellizca para zoom · Toca un equipo
+                  </span>
+                </p>
+              </div>
             </div>
-          </div>
         </section>
 
         <div className={styles.ticker} aria-hidden="true">
-          <div className={styles.tickerTrack}>
-            <div className={styles.tickerGroup}>
-              {tickerItems.map((item, index) => (
-                <span key={`${item}-${index}`}>{item}</span>
-              ))}
+            <div className={styles.tickerTrack}>
+              <div className={styles.tickerGroup}>
+                {tickerItems.map((item, index) => (
+                  <span key={`${item}-${index}`}>{item}</span>
+                ))}
+              </div>
+              <div className={styles.tickerGroup}>
+                {tickerItems.map((item, index) => (
+                  <span key={`${item}-duplicate-${index}`}>{item}</span>
+                ))}
+              </div>
             </div>
-            <div className={styles.tickerGroup}>
-              {tickerItems.map((item, index) => (
-                <span key={`${item}-duplicate-${index}`}>{item}</span>
-              ))}
-            </div>
-          </div>
         </div>
 
         <section className={styles.services} id="servicios">
@@ -357,44 +369,12 @@ export default function Home() {
           <div className={styles.projectBlock}>
             <div className={styles.projectBlockHeader}>
               <span>(03—A)</span>
-              <h3>Trabajos destacados</h3>
-              <p>
-                Nuestros trabajos más representativos de producción, mezcla y mastering.
-              </p>
-            </div>
-
-            <div className={styles.projectList}>
-              {featuredProjects.map((project, index) => (
-                <a
-                  aria-label={`Escuchar ${project.title} de ${project.artist} en Spotify`}
-                  className={styles.projectRow}
-                  href={project.href}
-                  key={project.title}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <div>
-                    <h4>{project.title}</h4>
-                    <p>{project.artist}</p>
-                  </div>
-                  <p>{project.service}</p>
-                  <time dateTime={project.date}>{project.dateLabel}</time>
-                  <span aria-hidden="true">↗</span>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.projectBlock}>
-            <div className={styles.projectBlockHeader}>
-              <span>(03—B)</span>
               <h3>Últimos trabajos</h3>
-              <p>Lo último en salir de horno</p>
+              <p>Lo último en salir del horno</p>
             </div>
 
             <div className={styles.projectList}>
-              {latestProjects.map((project, index) => (
+              {projects.map((project, index) => (
                 <a
                   aria-label={`Escuchar ${project.title} de ${project.artist} en Spotify`}
                   className={styles.projectRow}
@@ -404,6 +384,15 @@ export default function Home() {
                   target="_blank"
                 >
                   <span>{String(index + 1).padStart(2, "0")}</span>
+                  <span className={styles.projectCover}>
+                    <Image
+                      alt=""
+                      height={300}
+                      sizes="(max-width: 800px) 48px, 60px"
+                      src={project.image}
+                      width={300}
+                    />
+                  </span>
                   <div>
                     <h4>{project.title}</h4>
                     <p>{project.artist}</p>
@@ -425,7 +414,12 @@ export default function Home() {
 
           <div className={styles.contactContent}>
             <p>¿Tienes algo en mente?</p>
-            <a href="mailto:magmastudio46520@gmail.com">Hablemos ↗</a>
+            <a href="mailto:magmastudio46520@gmail.com">
+              <span>Hablemos</span>
+              <span aria-hidden="true" className={styles.contactArrow}>
+                ↗
+              </span>
+            </a>
           </div>
 
           <div className={styles.contactLayout}>
