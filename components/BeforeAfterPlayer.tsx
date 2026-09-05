@@ -12,12 +12,6 @@ const comparison = {
   afterSrc: "/audio/justanillusion.mp3",
 } as const;
 
-const waveform = [
-  24, 48, 34, 68, 52, 82, 43, 65, 92, 58, 73, 38, 62, 88, 55, 76, 46, 95,
-  69, 42, 81, 57, 91, 50, 72, 39, 64, 85, 48, 74, 56, 90, 67, 44, 78, 53,
-  86, 61, 35, 70, 49, 80, 58, 93, 65, 41, 75, 51,
-];
-
 function formatTime(value: number) {
   if (!Number.isFinite(value)) return "0:00";
   const minutes = Math.floor(value / 60);
@@ -98,6 +92,7 @@ export function BeforeAfterPlayer() {
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const isAfter = activeVersion === "after";
 
   return (
     <div className={styles.comparison}>
@@ -119,59 +114,57 @@ export function BeforeAfterPlayer() {
           <span>{comparison.service}</span>
         </div>
 
-        <div aria-label="Versión de audio" className={styles.switcher} role="group">
+        <div className={styles.playerBody}>
           <button
-            aria-pressed={activeVersion === "before"}
-            className={activeVersion === "before" ? styles.active : ""}
-            onClick={() => setActiveVersion("before")}
+            aria-label={isPlaying ? "Pausar audio" : "Reproducir audio"}
+            className={styles.playButton}
+            onClick={togglePlayback}
             type="button"
           >
-            <span>01</span>
-            Antes
-          </button>
-          <button
-            aria-pressed={activeVersion === "after"}
-            className={activeVersion === "after" ? styles.active : ""}
-            onClick={() => setActiveVersion("after")}
-            type="button"
-          >
-            <span>02</span>
-            Después
-          </button>
-        </div>
-
-        <div aria-hidden="true" className={styles.waveform}>
-          {waveform.map((height, index) => (
-            <i
-              className={index / waveform.length <= progress / 100 ? styles.played : ""}
-              key={`${height}-${index}`}
-              style={{ height: `${height}%` }}
-            />
-          ))}
-        </div>
-
-        <input
-          aria-label="Posición de reproducción"
-          className={styles.timeline}
-          max={duration || 0}
-          min="0"
-          onChange={(event) => seek(Number(event.target.value))}
-          step="0.01"
-          style={{ "--progress": `${progress}%` } as React.CSSProperties}
-          type="range"
-          value={Math.min(currentTime, duration || 0)}
-        />
-
-        <div className={styles.transport}>
-          <button onClick={togglePlayback} type="button">
             <span aria-hidden="true">{isPlaying ? "■" : "▶"}</span>
-            {isPlaying ? "Pausa" : "Escuchar"}
           </button>
-          <span>
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
-          <p>{hasError ? "No se ha podido cargar el audio" : "Cambia de versión en cualquier momento"}</p>
+
+          <div className={styles.progressArea}>
+            <input
+              aria-label="Posición de reproducción"
+              className={styles.timeline}
+              max={duration || 0}
+              min="0"
+              onInput={(event) => seek(Number(event.currentTarget.value))}
+              step="0.01"
+              style={{ "--progress": `${progress}%` } as React.CSSProperties}
+              type="range"
+              value={Math.min(currentTime, duration || 0)}
+            />
+            <div className={styles.timeRow}>
+              <span>{isPlaying ? "Reproduciendo" : "Pausado"}</span>
+              <span>
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.versionControl}>
+            <span className={!isAfter ? styles.selectedLabel : ""}>Antes</span>
+            <button
+              aria-checked={isAfter}
+              aria-label="Cambiar entre audio antes y después"
+              className={`${styles.toggle} ${isAfter ? styles.toggleOn : ""}`}
+              onClick={() => setActiveVersion(isAfter ? "before" : "after")}
+              role="switch"
+              type="button"
+            >
+              <span />
+            </button>
+            <span className={isAfter ? styles.selectedLabel : ""}>Después</span>
+          </div>
         </div>
+
+        <p className={styles.status}>
+          {hasError
+            ? "No se ha podido cargar el audio"
+            : "El cambio mantiene el mismo punto de reproducción"}
+        </p>
 
         <audio
           onEnded={reset}

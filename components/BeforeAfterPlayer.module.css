@@ -11,7 +11,9 @@
 
 .eyebrow,
 .playerHeader,
-.transport {
+.timeRow,
+.versionControl,
+.status {
   font-family: var(--font-geist-mono);
   text-transform: uppercase;
 }
@@ -71,76 +73,73 @@
   text-align: right;
 }
 
-.switcher {
-  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+.playerBody {
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-top: 1px solid color-mix(in srgb, currentColor 22%, transparent);
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.25rem, 2.5vw, 2.5rem);
+  grid-template-columns: auto minmax(10rem, 1fr) auto;
   margin-top: clamp(2rem, 5vw, 4.5rem);
+  padding: clamp(1.5rem, 3vw, 2.8rem) 0;
 }
 
-.switcher button {
-  align-items: center;
+.playButton {
   background: transparent;
-  border: 0;
+  border: 1px solid color-mix(in srgb, currentColor 42%, transparent);
   color: inherit;
   cursor: pointer;
+  align-items: center;
   display: flex;
-  font-family: var(--font-geist-sans);
-  font-size: clamp(1.25rem, 2vw, 2.1rem);
-  gap: 1rem;
+  height: clamp(3.5rem, 5vw, 4.8rem);
   justify-content: center;
-  padding: 1rem;
-  text-transform: uppercase;
-  transition: background-color 220ms ease, color 220ms ease;
+  transition: background-color 180ms ease, color 180ms ease;
+  width: clamp(3.5rem, 5vw, 4.8rem);
 }
 
-.switcher button + button {
-  border-left: 1px solid color-mix(in srgb, currentColor 35%, transparent);
-}
-
-.switcher button span {
-  font-family: var(--font-geist-mono);
-  font-size: 0.55rem;
-}
-
-.switcher button.active {
+.playButton:hover {
   background: var(--color-accent);
+  border-color: var(--color-accent);
   color: var(--color-brand-soft-black);
 }
 
-.waveform {
-  align-items: center;
-  display: flex;
-  gap: clamp(2px, 0.32vw, 5px);
-  height: clamp(5rem, 9vw, 8rem);
-  margin-top: 2rem;
-  overflow: hidden;
+.playButton span {
+  font-size: 0.8rem;
+  transform: translateX(0.05rem);
 }
 
-.waveform i {
-  background: color-mix(in srgb, currentColor 28%, transparent);
-  flex: 1 1 0;
-  min-width: 1px;
-  transition: background-color 160ms ease;
-}
-
-.waveform i.played {
-  background: var(--color-accent);
+.progressArea {
+  min-width: 0;
 }
 
 .timeline {
   --progress: 0%;
   appearance: none;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+  height: 1.75rem;
+  margin: 0;
+  touch-action: none;
+  width: 100%;
+}
+
+.timeline::-webkit-slider-runnable-track {
   background: linear-gradient(
     to right,
     var(--color-accent) 0 var(--progress),
     color-mix(in srgb, currentColor 30%, transparent) var(--progress) 100%
   );
-  cursor: pointer;
-  display: block;
-  height: 2px;
-  margin: 1.5rem 0 1rem;
-  width: 100%;
+  height: 3px;
+}
+
+.timeline::-moz-range-track {
+  background: linear-gradient(
+    to right,
+    var(--color-accent) 0 var(--progress),
+    color-mix(in srgb, currentColor 30%, transparent) var(--progress) 100%
+  );
+  height: 3px;
 }
 
 .timeline::-webkit-slider-thumb {
@@ -148,50 +147,83 @@
   background: var(--color-accent);
   border: 0;
   border-radius: 0;
-  height: 0.9rem;
-  width: 0.9rem;
+  height: 0.8rem;
+  margin-top: -0.31rem;
+  width: 0.8rem;
 }
 
 .timeline::-moz-range-thumb {
   background: var(--color-accent);
   border: 0;
   border-radius: 0;
-  height: 0.9rem;
-  width: 0.9rem;
+  height: 0.8rem;
+  width: 0.8rem;
 }
 
-.transport {
+.timeRow {
   align-items: center;
-  display: grid;
-  font-size: 0.56rem;
-  gap: 1rem;
-  grid-template-columns: auto auto 1fr;
-  letter-spacing: 0.05em;
-}
-
-.transport button {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  color: inherit;
-  cursor: pointer;
   display: flex;
-  font: inherit;
-  gap: 0.7rem;
-  padding: 0.65rem 0;
-  text-transform: uppercase;
+  font-size: 0.56rem;
+  justify-content: space-between;
+  letter-spacing: 0.05em;
+  margin-top: 0.8rem;
 }
 
-.transport button span {
-  color: var(--color-accent);
-}
-
-.transport > span {
+.timeRow span:last-child {
   font-variant-numeric: tabular-nums;
 }
 
-.transport p {
-  justify-self: end;
+.versionControl {
+  align-items: center;
+  display: flex;
+  font-size: 0.58rem;
+  gap: 0.65rem;
+  letter-spacing: 0.06em;
+}
+
+.versionControl > span {
+  color: color-mix(in srgb, currentColor 45%, transparent);
+  transition: color 180ms ease;
+}
+
+.versionControl > span.selectedLabel {
+  color: currentColor;
+}
+
+.toggle {
+  background: #666;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  height: 1.65rem;
+  padding: 0.18rem;
+  transition: background-color 220ms ease;
+  width: 3.1rem;
+}
+
+.toggle > span {
+  background: var(--color-brand-off-white);
+  border-radius: 50%;
+  display: block;
+  height: 1.29rem;
+  transform: translateX(0);
+  transition: transform 220ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  width: 1.29rem;
+}
+
+.toggleOn {
+  background: var(--color-accent);
+}
+
+.toggleOn > span {
+  transform: translateX(1.45rem);
+}
+
+.status {
+  color: color-mix(in srgb, currentColor 65%, transparent);
+  font-size: 0.54rem;
+  letter-spacing: 0.05em;
+  margin-top: 1rem;
   text-align: right;
 }
 
@@ -224,37 +256,33 @@
     max-width: 8rem;
   }
 
-  .switcher {
+  .playerBody {
+    gap: 1.2rem;
+    grid-template-columns: auto 1fr;
     margin-top: 2rem;
+    padding: 1.5rem 0;
   }
 
-  .switcher button {
-    font-size: 1.15rem;
-    gap: 0.55rem;
-    min-height: 3.6rem;
-    padding: 0.8rem 0.5rem;
+  .playButton {
+    height: 3.5rem;
+    width: 3.5rem;
   }
 
-  .waveform {
-    gap: 2px;
-    height: 5rem;
-    margin-top: 1.4rem;
-  }
-
-  .transport {
-    grid-template-columns: 1fr auto;
-  }
-
-  .transport p {
+  .versionControl {
     grid-column: 1 / -1;
-    justify-self: start;
-    text-align: left;
+    justify-content: flex-end;
+  }
+
+  .status {
+    line-height: 1.45;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .switcher button,
-  .waveform i {
+  .playButton,
+  .toggle,
+  .toggle > span,
+  .versionControl > span {
     transition: none;
   }
 }
