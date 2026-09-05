@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SectionTransition } from "@/components/SectionTransition";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MAGMA — Estudio de música contemporánea",
+  title: "MAGMA — Próximamente",
   description:
-    "Producción musical, grabación, mezcla y mastering con una identidad propia.",
+    "MAGMA, estudio de música contemporánea. Próximamente.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -24,7 +23,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         {children}
-        <SectionTransition />
       </body>
     </html>
   );

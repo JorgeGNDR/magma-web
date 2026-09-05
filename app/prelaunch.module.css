@@ -1,0 +1,22 @@
+.prelaunch {
+  background: var(--color-brand-off-white);
+  height: 100svh;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.scene {
+  inset: 0;
+  position: absolute;
+}
+
+.srOnly {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
