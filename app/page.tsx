@@ -10,6 +10,19 @@ export default function Home() {
       <div className={styles.scene} aria-hidden="true">
         <LogoScene />
       </div>
+
+      <div className={styles.meta}>
+        <p>
+          Estudio independiente
+          <br />
+          de música contemporánea
+        </p>
+        <p>
+          Producción · Grabación
+          <br />
+          Mezcla · Mastering
+        </p>
+      </div>
     </main>
   );
 }
