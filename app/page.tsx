@@ -22,6 +22,7 @@ export default function Home() {
           <br />
           Mezcla · Mastering
         </p>
+        <p>Próximamente</p>
       </div>
     </main>
   );

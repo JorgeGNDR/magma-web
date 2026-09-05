@@ -34,6 +34,11 @@
   justify-self: center;
 }
 
+.meta p:nth-child(3) {
+  grid-column: 3;
+  justify-self: end;
+}
+
 .srOnly {
   clip: rect(0, 0, 0, 0);
   clip-path: inset(50%);
@@ -51,11 +56,23 @@
     grid-template-columns: 1fr auto;
     left: 1.1rem;
     right: 1.1rem;
+    row-gap: 0.45rem;
   }
 
   .meta p:nth-child(2) {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    justify-self: center;
+    text-align: center;
+  }
+
+  .meta p:first-child {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .meta p:nth-child(3) {
     grid-column: 2;
-    justify-self: end;
-    text-align: right;
+    grid-row: 2;
   }
 }
