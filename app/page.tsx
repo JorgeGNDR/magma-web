@@ -17,11 +17,6 @@ export default function Home() {
           <br />
           de música contemporánea
         </p>
-        <p>
-          Producción · Grabación
-          <br />
-          Mezcla · Mastering
-        </p>
         <p>Próximamente</p>
       </div>
     </main>
