@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
+import type { ThreeEvent } from "@react-three/fiber";
 import * as THREE from "three";
 import { audioSignal } from "./audioSignal";
 import { Original3DLogo } from "./Original3DLogo";
@@ -19,6 +20,116 @@ const LIGHT_CONFIG = {
   playingNeutralIntensity: 0.625,
   targetResponse: 4.5,
 } as const;
+
+const MOBILE_SCROLL_CONFIG = {
+  damping: 0.012,
+  minimumVelocity: 0.025,
+  velocitySmoothing: 0.72,
+} as const;
+
+type BackgroundScrollGesture = {
+  pointerId: number;
+  previousTime: number;
+  previousY: number;
+  velocity: number;
+};
+
+type PointerCaptureTarget = EventTarget & {
+  setPointerCapture: (pointerId: number) => void;
+};
+
+function ScrollableBackdrop() {
+  const gestureRef = useRef<BackgroundScrollGesture | null>(null);
+  const inertiaFrameRef = useRef<number | null>(null);
+
+  const cancelInertia = useCallback(() => {
+    if (inertiaFrameRef.current === null) return;
+
+    window.cancelAnimationFrame(inertiaFrameRef.current);
+    inertiaFrameRef.current = null;
+  }, []);
+
+  const finishGesture = useCallback(
+    (event: ThreeEvent<PointerEvent>) => {
+      const gesture = gestureRef.current;
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+      gestureRef.current = null;
+      const initialVelocity = gesture.velocity;
+      if (Math.abs(initialVelocity) < MOBILE_SCROLL_CONFIG.minimumVelocity) {
+        return;
+      }
+
+      let velocity = initialVelocity;
+      let previousTime = performance.now();
+
+      const applyInertia = (time: number) => {
+        const elapsed = Math.min(time - previousTime, 32);
+        previousTime = time;
+        window.scrollBy(0, velocity * elapsed);
+        velocity *= Math.exp(-MOBILE_SCROLL_CONFIG.damping * elapsed);
+
+        if (Math.abs(velocity) >= MOBILE_SCROLL_CONFIG.minimumVelocity) {
+          inertiaFrameRef.current = window.requestAnimationFrame(applyInertia);
+        } else {
+          inertiaFrameRef.current = null;
+        }
+      };
+
+      inertiaFrameRef.current = window.requestAnimationFrame(applyInertia);
+    },
+    [],
+  );
+
+  useEffect(() => cancelInertia, [cancelInertia]);
+
+  return (
+    <mesh
+      position={[0, 0, -0.25]}
+      receiveShadow
+      onPointerCancel={finishGesture}
+      onPointerDown={(event) => {
+        if (event.pointerType !== "touch") return;
+
+        event.stopPropagation();
+        event.nativeEvent.preventDefault();
+        cancelInertia();
+        gestureRef.current = {
+          pointerId: event.pointerId,
+          previousTime: performance.now(),
+          previousY: event.clientY,
+          velocity: 0,
+        };
+        const pointerTarget = event.target as PointerCaptureTarget | null;
+        pointerTarget?.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        const gesture = gestureRef.current;
+        if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+        event.stopPropagation();
+        event.nativeEvent.preventDefault();
+        const time = performance.now();
+        const elapsed = Math.max(time - gesture.previousTime, 1);
+        const distance = gesture.previousY - event.clientY;
+        const nextVelocity = distance / elapsed;
+
+        window.scrollBy(0, distance);
+        gesture.velocity = THREE.MathUtils.lerp(
+          nextVelocity,
+          gesture.velocity,
+          MOBILE_SCROLL_CONFIG.velocitySmoothing,
+        );
+        gesture.previousTime = time;
+        gesture.previousY = event.clientY;
+      }}
+      onPointerUp={finishGesture}
+    >
+      <planeGeometry args={[24, 14]} />
+      <meshStandardMaterial color={palette.background} roughness={1} />
+    </mesh>
+  );
+}
 
 function averageBands(start: number, end: number) {
   let sum = 0;
@@ -216,10 +327,7 @@ export function LogoScene() {
       <color attach="background" args={[palette.background]} />
       <ReactiveLights />
 
-      <mesh position={[0, 0, -0.25]} receiveShadow>
-        <planeGeometry args={[24, 14]} />
-        <meshStandardMaterial color={palette.background} roughness={1} />
-      </mesh>
+      <ScrollableBackdrop />
 
       <Suspense fallback={null}>
         <Original3DLogo />
