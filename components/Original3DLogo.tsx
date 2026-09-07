@@ -125,6 +125,7 @@ export function Original3DLogo() {
       child.castShadow = true;
       child.receiveShadow = true;
       child.material = material;
+      child.userData.logoPiece = true;
 
       child.geometry.computeBoundingBox();
       const geometryCenter = child.geometry.boundingBox?.getCenter(

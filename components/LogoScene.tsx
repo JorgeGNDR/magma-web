@@ -1,8 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import type { ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { audioSignal } from "./audioSignal";
 import { Original3DLogo } from "./Original3DLogo";
@@ -28,19 +27,18 @@ const MOBILE_SCROLL_CONFIG = {
 } as const;
 
 type BackgroundScrollGesture = {
-  pointerId: number;
+  identifier: number;
   previousTime: number;
   previousY: number;
   velocity: number;
 };
 
-type PointerCaptureTarget = EventTarget & {
-  setPointerCapture: (pointerId: number) => void;
-};
-
-function ScrollableBackdrop() {
+function MobileTouchRouter() {
+  const { camera, gl, scene } = useThree();
   const gestureRef = useRef<BackgroundScrollGesture | null>(null);
   const inertiaFrameRef = useRef<number | null>(null);
+  const pointer = useMemo(() => new THREE.Vector2(), []);
+  const raycaster = useMemo(() => new THREE.Raycaster(), []);
 
   const cancelInertia = useCallback(() => {
     if (inertiaFrameRef.current === null) return;
@@ -49,13 +47,35 @@ function ScrollableBackdrop() {
     inertiaFrameRef.current = null;
   }, []);
 
-  const finishGesture = useCallback(
-    (event: ThreeEvent<PointerEvent>) => {
-      const gesture = gestureRef.current;
-      if (!gesture || gesture.pointerId !== event.pointerId) return;
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const mediaQuery = window.matchMedia(
+      "(max-width: 800px), (pointer: coarse)",
+    );
 
-      gestureRef.current = null;
-      const initialVelocity = gesture.velocity;
+    const findTouch = (touches: TouchList, identifier: number) => {
+      for (let index = 0; index < touches.length; index += 1) {
+        const touch = touches.item(index);
+        if (touch?.identifier === identifier) return touch;
+      }
+
+      return null;
+    };
+
+    const isLogoPiece = (touch: Touch) => {
+      const rect = canvas.getBoundingClientRect();
+      pointer.set(
+        ((touch.clientX - rect.left) / rect.width) * 2 - 1,
+        -((touch.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      raycaster.setFromCamera(pointer, camera);
+
+      return raycaster
+        .intersectObjects(scene.children, true)
+        .some((intersection) => intersection.object.userData.logoPiece);
+    };
+
+    const startInertia = (initialVelocity: number) => {
       if (Math.abs(initialVelocity) < MOBILE_SCROLL_CONFIG.minimumVelocity) {
         return;
       }
@@ -65,11 +85,18 @@ function ScrollableBackdrop() {
 
       const applyInertia = (time: number) => {
         const elapsed = Math.min(time - previousTime, 32);
+        const scrollingElement = document.scrollingElement;
         previousTime = time;
-        window.scrollBy(0, velocity * elapsed);
+        if (!scrollingElement) return;
+
+        const previousScrollTop = scrollingElement.scrollTop;
+        scrollingElement.scrollTop += velocity * elapsed;
         velocity *= Math.exp(-MOBILE_SCROLL_CONFIG.damping * elapsed);
 
-        if (Math.abs(velocity) >= MOBILE_SCROLL_CONFIG.minimumVelocity) {
+        if (
+          scrollingElement.scrollTop !== previousScrollTop &&
+          Math.abs(velocity) >= MOBILE_SCROLL_CONFIG.minimumVelocity
+        ) {
           inertiaFrameRef.current = window.requestAnimationFrame(applyInertia);
         } else {
           inertiaFrameRef.current = null;
@@ -77,58 +104,83 @@ function ScrollableBackdrop() {
       };
 
       inertiaFrameRef.current = window.requestAnimationFrame(applyInertia);
-    },
-    [],
-  );
+    };
 
-  useEffect(() => cancelInertia, [cancelInertia]);
+    const handleTouchStart = (event: TouchEvent) => {
+      cancelInertia();
+      if (!mediaQuery.matches || event.touches.length !== 1) {
+        gestureRef.current = null;
+        return;
+      }
 
-  return (
-    <mesh
-      position={[0, 0, -0.25]}
-      receiveShadow
-      onPointerCancel={finishGesture}
-      onPointerDown={(event) => {
-        if (event.pointerType !== "touch") return;
+      const touch = event.touches.item(0);
+      if (!touch || isLogoPiece(touch)) {
+        gestureRef.current = null;
+        return;
+      }
 
-        event.stopPropagation();
-        event.nativeEvent.preventDefault();
-        cancelInertia();
-        gestureRef.current = {
-          pointerId: event.pointerId,
-          previousTime: performance.now(),
-          previousY: event.clientY,
-          velocity: 0,
-        };
-        const pointerTarget = event.target as PointerCaptureTarget | null;
-        pointerTarget?.setPointerCapture(event.pointerId);
-      }}
-      onPointerMove={(event) => {
-        const gesture = gestureRef.current;
-        if (!gesture || gesture.pointerId !== event.pointerId) return;
+      event.preventDefault();
+      gestureRef.current = {
+        identifier: touch.identifier,
+        previousTime: performance.now(),
+        previousY: touch.clientY,
+        velocity: 0,
+      };
+    };
 
-        event.stopPropagation();
-        event.nativeEvent.preventDefault();
-        const time = performance.now();
-        const elapsed = Math.max(time - gesture.previousTime, 1);
-        const distance = gesture.previousY - event.clientY;
-        const nextVelocity = distance / elapsed;
+    const handleTouchMove = (event: TouchEvent) => {
+      const gesture = gestureRef.current;
+      if (!gesture) return;
 
-        window.scrollBy(0, distance);
-        gesture.velocity = THREE.MathUtils.lerp(
-          nextVelocity,
-          gesture.velocity,
-          MOBILE_SCROLL_CONFIG.velocitySmoothing,
-        );
-        gesture.previousTime = time;
-        gesture.previousY = event.clientY;
-      }}
-      onPointerUp={finishGesture}
-    >
-      <planeGeometry args={[24, 14]} />
-      <meshStandardMaterial color={palette.background} roughness={1} />
-    </mesh>
-  );
+      const touch = findTouch(event.touches, gesture.identifier);
+      const scrollingElement = document.scrollingElement;
+      if (!touch || !scrollingElement) return;
+
+      event.preventDefault();
+      const time = performance.now();
+      const elapsed = Math.max(time - gesture.previousTime, 1);
+      const distance = gesture.previousY - touch.clientY;
+      const nextVelocity = distance / elapsed;
+
+      scrollingElement.scrollTop += distance;
+      gesture.velocity = THREE.MathUtils.lerp(
+        nextVelocity,
+        gesture.velocity,
+        MOBILE_SCROLL_CONFIG.velocitySmoothing,
+      );
+      gesture.previousTime = time;
+      gesture.previousY = touch.clientY;
+    };
+
+    const handleTouchEnd = (event: TouchEvent) => {
+      const gesture = gestureRef.current;
+      if (!gesture || !findTouch(event.changedTouches, gesture.identifier)) {
+        return;
+      }
+
+      gestureRef.current = null;
+      startInertia(gesture.velocity);
+    };
+
+    const handleTouchCancel = () => {
+      gestureRef.current = null;
+    };
+
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchend", handleTouchEnd);
+    canvas.addEventListener("touchcancel", handleTouchCancel);
+
+    return () => {
+      cancelInertia();
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+      canvas.removeEventListener("touchcancel", handleTouchCancel);
+    };
+  }, [camera, cancelInertia, gl, pointer, raycaster, scene]);
+
+  return null;
 }
 
 function averageBands(start: number, end: number) {
@@ -326,8 +378,12 @@ export function LogoScene() {
     >
       <color attach="background" args={[palette.background]} />
       <ReactiveLights />
+      <MobileTouchRouter />
 
-      <ScrollableBackdrop />
+      <mesh position={[0, 0, -0.25]} receiveShadow>
+        <planeGeometry args={[24, 14]} />
+        <meshStandardMaterial color={palette.background} roughness={1} />
+      </mesh>
 
       <Suspense fallback={null}>
         <Original3DLogo />
