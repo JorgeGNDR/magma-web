@@ -40,7 +40,7 @@ const STUDIO_LIGHT_CONFIG = {
 const STUDIO_ROTATION_SPEED = 0.018;
 const STUDIO_FOCUS_DURATION = 0.72;
 const STUDIO_INITIAL_FIT_MARGIN = 0.92;
-const STUDIO_MOBILE_FIT_MARGIN = 0.74;
+const STUDIO_MOBILE_FIT_MARGIN = 1.1;
 const STUDIO_MIN_ZOOM = 100;
 const STUDIO_BASE_MAX_ZOOM = 700;
 const STUDIO_MAX_ZOOM = 800;
@@ -48,10 +48,10 @@ const STUDIO_ZOOM_STEP = 1.2;
 const STUDIO_RENDER_QUALITY = {
   mobile: {
     id: "mobile",
-    initialDpr: 1.15,
+    initialDpr: 1.75,
     initialFactor: 0.3,
-    maxDpr: 1.5,
-    minDpr: 0.85,
+    maxDpr: 2,
+    minDpr: 1.5,
   },
   retina: {
     id: "retina",
@@ -511,6 +511,7 @@ function InteractiveStudioModel({
 }: InteractiveStudioModelProps) {
   const bounds = useBounds();
   const { camera, controls, gl } = useThree();
+  const isMobile = useThree((state) => state.size.width <= 800);
   const cameraRef = useRef(camera);
   const controlsRef = useRef<StudioOrbitControls | null>(
     controls as StudioOrbitControls | null,
@@ -735,6 +736,7 @@ function InteractiveStudioModel({
 
     const rotationGroup = rotationRef.current;
     if (
+      isMobile ||
       !isSceneVisible ||
       !rotationGroup ||
       selection ||
@@ -963,6 +965,7 @@ function StudioModel({
 function CameraKeyLight() {
   const lightRef = useRef<THREE.DirectionalLight>(null);
   const { camera } = useThree();
+  const isMobile = useThree((state) => state.size.width <= 800);
 
   useFrame(() => {
     const light = lightRef.current;
@@ -980,6 +983,7 @@ function CameraKeyLight() {
       intensity={STUDIO_LIGHT_CONFIG.keyIntensity}
       position={[8, 9.25, 8]}
       shadow-bias={-0.0001}
+      shadow-normalBias={isMobile ? 0.02 : 0}
       shadow-blurSamples={12}
       shadow-mapSize-height={2048}
       shadow-mapSize-width={2048}
@@ -1162,7 +1166,7 @@ export function StudioScene() {
           zoom: 45,
         }}
         dpr={sceneDpr}
-        frameloop="always"
+        frameloop={isSceneVisible ? "always" : "never"}
         gl={{
           antialias: true,
           powerPreference: "high-performance",
@@ -1173,7 +1177,7 @@ export function StudioScene() {
           setSelection(null);
         }}
         orthographic
-        shadows="variance"
+        shadows={renderQualityProfile.id === "mobile" ? "soft" : "variance"}
       >
         {isSceneVisible ? (
           <PerformanceMonitor

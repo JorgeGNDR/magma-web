@@ -249,7 +249,7 @@
 @media (max-width: 800px) {
   .playerShell {
     --player-width: min(21rem, calc(100vw - 1.5rem));
-    top: calc(50% + 4.75rem);
+    top: 73%;
   }
 
   .compactRow {

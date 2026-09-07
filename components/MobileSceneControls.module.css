@@ -1,0 +1,52 @@
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.toggle { display: none; }
+.scrollShield { display: none; }
+
+@media (max-width: 800px) {
+  .scrollShield {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 11;
+    touch-action: pan-y;
+  }
+  .root[data-active="false"] canvas {
+    pointer-events: none;
+  }
+
+  .root[data-active="false"] > div:first-child {
+    pointer-events: none;
+  }
+
+  .root[data-active="false"] [aria-label="Controles de zoom"] {
+    visibility: hidden;
+  }
+
+  .toggle {
+    display: block;
+    position: absolute;
+    z-index: 12;
+    bottom: 0.75rem;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    min-height: 44px;
+    padding: 0.65rem 1rem;
+    border: 1px solid rgb(224 224 224 / 35%);
+    border-radius: 2rem;
+    background: var(--color-brand-soft-black);
+    color: var(--color-brand-off-white);
+    font: 0.7rem var(--font-geist-mono);
+    cursor: pointer;
+  }
+
+  .root[data-active="true"] .toggle {
+    background: var(--color-accent);
+    color: var(--color-brand-soft-black);
+  }
+}

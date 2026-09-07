@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { audioSignal } from "./audioSignal";
 import { Original3DLogo } from "./Original3DLogo";
@@ -20,168 +20,6 @@ const LIGHT_CONFIG = {
   targetResponse: 4.5,
 } as const;
 
-const MOBILE_SCROLL_CONFIG = {
-  damping: 0.012,
-  minimumVelocity: 0.025,
-  velocitySmoothing: 0.72,
-} as const;
-
-type BackgroundScrollGesture = {
-  identifier: number;
-  previousTime: number;
-  previousY: number;
-  velocity: number;
-};
-
-function MobileTouchRouter() {
-  const { camera, gl, scene } = useThree();
-  const gestureRef = useRef<BackgroundScrollGesture | null>(null);
-  const inertiaFrameRef = useRef<number | null>(null);
-  const pointer = useMemo(() => new THREE.Vector2(), []);
-  const raycaster = useMemo(() => new THREE.Raycaster(), []);
-
-  const cancelInertia = useCallback(() => {
-    if (inertiaFrameRef.current === null) return;
-
-    window.cancelAnimationFrame(inertiaFrameRef.current);
-    inertiaFrameRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    const canvas = gl.domElement;
-    const mediaQuery = window.matchMedia(
-      "(max-width: 800px), (pointer: coarse)",
-    );
-
-    const findTouch = (touches: TouchList, identifier: number) => {
-      for (let index = 0; index < touches.length; index += 1) {
-        const touch = touches.item(index);
-        if (touch?.identifier === identifier) return touch;
-      }
-
-      return null;
-    };
-
-    const isLogoPiece = (touch: Touch) => {
-      const rect = canvas.getBoundingClientRect();
-      pointer.set(
-        ((touch.clientX - rect.left) / rect.width) * 2 - 1,
-        -((touch.clientY - rect.top) / rect.height) * 2 + 1,
-      );
-      raycaster.setFromCamera(pointer, camera);
-
-      return raycaster
-        .intersectObjects(scene.children, true)
-        .some((intersection) => intersection.object.userData.logoPiece);
-    };
-
-    const startInertia = (initialVelocity: number) => {
-      if (Math.abs(initialVelocity) < MOBILE_SCROLL_CONFIG.minimumVelocity) {
-        return;
-      }
-
-      let velocity = initialVelocity;
-      let previousTime = performance.now();
-
-      const applyInertia = (time: number) => {
-        const elapsed = Math.min(time - previousTime, 32);
-        const scrollingElement = document.scrollingElement;
-        previousTime = time;
-        if (!scrollingElement) return;
-
-        const previousScrollTop = scrollingElement.scrollTop;
-        scrollingElement.scrollTop += velocity * elapsed;
-        velocity *= Math.exp(-MOBILE_SCROLL_CONFIG.damping * elapsed);
-
-        if (
-          scrollingElement.scrollTop !== previousScrollTop &&
-          Math.abs(velocity) >= MOBILE_SCROLL_CONFIG.minimumVelocity
-        ) {
-          inertiaFrameRef.current = window.requestAnimationFrame(applyInertia);
-        } else {
-          inertiaFrameRef.current = null;
-        }
-      };
-
-      inertiaFrameRef.current = window.requestAnimationFrame(applyInertia);
-    };
-
-    const handleTouchStart = (event: TouchEvent) => {
-      cancelInertia();
-      if (!mediaQuery.matches || event.touches.length !== 1) {
-        gestureRef.current = null;
-        return;
-      }
-
-      const touch = event.touches.item(0);
-      if (!touch || isLogoPiece(touch)) {
-        gestureRef.current = null;
-        return;
-      }
-
-      event.preventDefault();
-      gestureRef.current = {
-        identifier: touch.identifier,
-        previousTime: performance.now(),
-        previousY: touch.clientY,
-        velocity: 0,
-      };
-    };
-
-    const handleTouchMove = (event: TouchEvent) => {
-      const gesture = gestureRef.current;
-      if (!gesture) return;
-
-      const touch = findTouch(event.touches, gesture.identifier);
-      const scrollingElement = document.scrollingElement;
-      if (!touch || !scrollingElement) return;
-
-      event.preventDefault();
-      const time = performance.now();
-      const elapsed = Math.max(time - gesture.previousTime, 1);
-      const distance = gesture.previousY - touch.clientY;
-      const nextVelocity = distance / elapsed;
-
-      scrollingElement.scrollTop += distance;
-      gesture.velocity = THREE.MathUtils.lerp(
-        nextVelocity,
-        gesture.velocity,
-        MOBILE_SCROLL_CONFIG.velocitySmoothing,
-      );
-      gesture.previousTime = time;
-      gesture.previousY = touch.clientY;
-    };
-
-    const handleTouchEnd = (event: TouchEvent) => {
-      const gesture = gestureRef.current;
-      if (!gesture || !findTouch(event.changedTouches, gesture.identifier)) {
-        return;
-      }
-
-      gestureRef.current = null;
-      startInertia(gesture.velocity);
-    };
-
-    const handleTouchCancel = () => {
-      gestureRef.current = null;
-    };
-
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
-    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-    canvas.addEventListener("touchend", handleTouchEnd);
-    canvas.addEventListener("touchcancel", handleTouchCancel);
-
-    return () => {
-      cancelInertia();
-      canvas.removeEventListener("touchstart", handleTouchStart);
-      canvas.removeEventListener("touchmove", handleTouchMove);
-      canvas.removeEventListener("touchend", handleTouchEnd);
-      canvas.removeEventListener("touchcancel", handleTouchCancel);
-    };
-  }, [camera, cancelInertia, gl, pointer, raycaster, scene]);
-
-  return null;
-}
 
 function averageBands(start: number, end: number) {
   let sum = 0;
@@ -364,8 +202,19 @@ function ReactiveLights() {
 /* eslint-enable react-hooks/immutability */
 
 export function LogoScene() {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      setVisible(entry.isIntersecting);
+    });
+    if (rootRef.current) observer.observe(rootRef.current);
+    return () => observer.disconnect();
+  }, []);
   return (
+    <div ref={rootRef} style={{ width: "100%", height: "100%" }}>
     <Canvas
+      frameloop={visible ? "always" : "never"}
       camera={{ position: [0, 0, 8], fov: 35 }}
       dpr={[1, 2]}
       gl={{
@@ -378,7 +227,6 @@ export function LogoScene() {
     >
       <color attach="background" args={[palette.background]} />
       <ReactiveLights />
-      <MobileTouchRouter />
 
       <mesh position={[0, 0, -0.25]} receiveShadow>
         <planeGeometry args={[24, 14]} />
@@ -389,5 +237,6 @@ export function LogoScene() {
         <Original3DLogo />
       </Suspense>
     </Canvas>
+    </div>
   );
 }

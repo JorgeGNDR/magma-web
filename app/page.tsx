@@ -2,6 +2,7 @@ import Image from "next/image";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { BeforeAfterPlayer } from "@/components/BeforeAfterPlayer";
 import { LogoScene } from "@/components/LogoScene";
+import { MobileSceneControls } from "@/components/MobileSceneControls";
 import { SiteHeader } from "@/components/SiteHeader";
 import { StudioScene } from "@/components/StudioScene";
 import styles from "./page.module.css";
@@ -204,8 +205,10 @@ export default function Home() {
             MAGMA, estudio de música contemporánea
           </h1>
 
-          <div className={styles.scene} aria-hidden="true">
-            <LogoScene />
+          <div className={styles.scene}>
+            <MobileSceneControls label="Jugar con el logo">
+              <LogoScene />
+            </MobileSceneControls>
           </div>
 
           <AudioPlayer />
@@ -245,7 +248,9 @@ export default function Home() {
                 className={styles.studioScene}
                 role="application"
               >
-                <StudioScene />
+                <MobileSceneControls label="Explorar el estudio">
+                  <StudioScene />
+                </MobileSceneControls>
                 <p className={styles.studioHint}>
                   <span className={styles.desktopHint}>
                     Arrastra para girar · ⌥ + scroll para zoom · Clica un equipo

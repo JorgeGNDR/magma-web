@@ -812,7 +812,19 @@
   }
 
   .navigation {
-    display: none;
+    display: flex;
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.65rem;
+    margin-top: 0.5rem;
+  }
+
+  .navigation a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 
   .availability {
@@ -829,10 +841,21 @@
   }
 
   .hero {
-    min-height: 38rem;
+    height: 92svh;
+    min-height: 32rem;
+    background: #ebebeb;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 10% 0 auto;
+    height: 58%;
+    z-index: 0;
   }
 
   .heroMeta {
+    mix-blend-mode: normal;
+    color: var(--color-brand-soft-black);
     bottom: 1.1rem;
     grid-template-columns: 1fr auto;
     left: 1.1rem;
@@ -877,11 +900,12 @@
   }
 
   .studioTitle {
-    font-size: clamp(3rem, 15vw, 5rem);
+    font-size: clamp(2.2rem, 10vw, 3.2rem);
+    line-height: 0.95;
   }
 
   .studioScene {
-    height: min(112vw, 32rem);
+    height: min(105vw, 28rem);
     margin-left: -1.1rem;
     margin-right: -1.1rem;
     min-height: 0;
@@ -889,6 +913,7 @@
   }
 
   .studioHint {
+    display: none;
     bottom: 0.7rem;
     font-size: 0.52rem;
     line-height: 1.4;
@@ -908,12 +933,12 @@
     align-items: start;
     gap: 1.5rem;
     grid-template-columns: 1fr;
-    margin: 3.5rem 0 2.25rem;
+    margin: 2rem 0 1.5rem;
   }
 
   .serviceIntro h2 {
-    font-size: clamp(2.35rem, 10.5vw, 3.5rem);
-    line-height: 0.86;
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    line-height: 0.98;
   }
 
   .serviceIntro > div {
@@ -931,7 +956,7 @@
 
   .onlineService {
     min-height: 0;
-    padding: 1.1rem;
+    padding: 1rem;
   }
 
   .onlineService + .onlineService {
@@ -945,20 +970,34 @@
   }
 
   .onlineService h3 {
-    font-size: clamp(2.2rem, 10.5vw, 3.25rem);
-    margin-top: 2.25rem;
+    font-size: clamp(1.75rem, 7.5vw, 2.25rem);
+    margin-top: 0.8rem;
+    max-width: none;
+    line-height: 1;
   }
 
   .onlineService > p {
-    font-size: 0.86rem;
+    font-size: 0.9rem;
+    margin-top: 0.75rem;
   }
 
   .onlineService ul {
-    margin-top: 2rem;
+    margin-top: 0.85rem;
+    padding-left: 0;
+    margin-bottom: 0;
+    font-size: 0.65rem;
+  }
+
+  .onlineService li {
+    padding: 0.55rem 0;
+  }
+
+  .onlineService .serviceAction {
+    margin-top: 0.85rem;
   }
 
   .serviceList {
-    margin-top: 3.5rem;
+    margin-top: 2rem;
   }
 
   .service {
@@ -968,7 +1007,8 @@
   }
 
   .service h3 {
-    font-size: clamp(1.8rem, 9vw, 2.6rem);
+    font-size: clamp(1.45rem, 6.3vw, 2rem);
+    line-height: 1.05;
   }
 
   .serviceCopy {
@@ -985,9 +1025,10 @@
   }
 
   .quoteButton {
-    font-size: 0.5rem;
-    max-width: 9rem;
-    padding: 0.7rem;
+    font-size: 0.65rem;
+    max-width: none;
+    min-height: 44px;
+    padding: 0.85rem;
   }
 
   .projects {
@@ -996,7 +1037,7 @@
 
   .projectIntro {
     gap: 1.25rem;
-    margin: 4rem 0 3rem;
+    margin: 2rem 0 1.5rem;
   }
 
   .projectIntro h2 {
@@ -1045,7 +1086,7 @@
   }
 
   .contactContent {
-    margin-top: 5rem;
+    margin-top: 2.5rem;
   }
 
   .contactContent a {
@@ -1066,9 +1107,9 @@
   }
 
   .contactLayout {
-    gap: 3.5rem;
+    gap: 2rem;
     grid-template-columns: 1fr;
-    margin-top: 4.5rem;
+    margin-top: 2rem;
   }
 
   .contactIntro {
@@ -1155,4 +1196,16 @@
 
 .navigation a:hover::before {
   transform: translateY(-100%);
+}
+
+@media (max-width: 800px) {
+  .navigation a {
+    display: inline-flex;
+    align-items: center;
+    height: auto;
+    min-height: 44px;
+  }
+
+  .navigation a::before { display: none; }
+  .navigation a:hover span { transform: none; }
 }

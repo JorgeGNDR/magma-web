@@ -99,6 +99,7 @@ export function Original3DLogo() {
   const { scene } = useGLTF(MODEL_URL);
   const viewportWidth = useThree((state) => state.viewport.width);
   const camera = useThree((state) => state.camera);
+  const isMobile = useThree((state) => state.size.width <= 800);
   const responsiveScale = Math.min(1, viewportWidth / 7.2);
   const motionGroupRef = useRef<THREE.Group>(null);
   const scrollProgressRef = useRef(0);
@@ -280,7 +281,7 @@ export function Original3DLogo() {
       1,
     );
     const rawScrollProgress = THREE.MathUtils.clamp(
-      window.scrollY / scrollDistance,
+      isMobile ? 0 : window.scrollY / scrollDistance,
       0,
       1,
     );

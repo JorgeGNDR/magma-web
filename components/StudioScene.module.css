@@ -160,6 +160,16 @@
     left: 0.7rem;
   }
 
+  .zoomControls button {
+    height: 44px;
+    width: 44px;
+  }
+
+  .zoomControls {
+    top: 0.7rem;
+    bottom: auto;
+  }
+
   .equipmentCard {
     width: min(16rem, 68vw);
   }
@@ -169,7 +179,7 @@
   }
 
   .mobileEquipmentCard {
-    bottom: 3.15rem;
+    bottom: 4.2rem;
     display: block;
     left: auto;
     max-height: min(18rem, calc(100% - 4.25rem));
@@ -178,7 +188,7 @@
     padding: 0.7rem;
     position: absolute;
     right: 0.7rem;
-    width: min(15rem, 72vw);
+    width: min(17rem, 78vw);
     z-index: 7;
   }
 
@@ -195,8 +205,8 @@
   }
 
   .mobileEquipmentCard > p {
-    font-size: 0.64rem;
-    line-height: 1.35;
+    font-size: 0.8rem;
+    line-height: 1.45;
     margin-top: 0.6rem;
   }
 
