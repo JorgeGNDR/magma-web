@@ -1,45 +1,40 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "./MobileSceneControls.module.css";
 
-export function MobileSceneControls({
-  children,
-  label,
-}: {
-  children: ReactNode;
-  label: string;
-}) {
+export function MobileSceneControls({ children, label }: { children: ReactNode; label: string }) {
   const [active, setActive] = useState(false);
-  const root = useRef<HTMLDivElement>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) setActive(false);
-    });
-    if (root.current) observer.observe(root.current);
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActive(false);
-    };
-    window.addEventListener("keydown", close);
+    if (!active) return;
+    const trigger = toggle.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.current?.showModal();
     return () => {
-      observer.disconnect();
-      window.removeEventListener("keydown", close);
+      document.body.style.overflow = previousOverflow;
+      trigger?.focus();
     };
-  }, []);
+  }, [active]);
 
   return (
-    <div ref={root} className={styles.root} data-active={active}>
-      {children}
-      {!active && <div className={styles.scrollShield} aria-hidden="true" />}
-      <button
-        className={styles.toggle}
-        type="button"
-        aria-pressed={active}
-        onClick={() => setActive((value) => !value)}
-      >
-        {active ? "Terminar · seguir bajando ↓" : label}
+    <div className={styles.root}>
+      {!active && children}
+      <div className={styles.scrollShield} aria-hidden="true" />
+      <button ref={toggle} className={styles.toggle} type="button" onClick={() => setActive(true)}>
+        {label}
       </button>
+      {active && createPortal(
+        <dialog ref={dialog} className={styles.fullscreen} aria-label="Explorar el estudio" onCancel={() => setActive(false)}>
+          <div className={styles.experience}>{children}</div>
+          <button autoFocus className={styles.close} type="button" onClick={() => setActive(false)}>Cerrar ✕</button>
+          <p className={styles.hint}>Arrastra para girar · Pellizca para zoom · Toca un equipo</p>
+        </dialog>, document.body,
+      )}
     </div>
   );
 }

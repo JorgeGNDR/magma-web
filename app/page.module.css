@@ -850,6 +850,8 @@
     position: absolute;
     inset: 10% 0 auto;
     height: 58%;
+    pointer-events: none;
+    touch-action: pan-y;
     z-index: 0;
   }
 

@@ -40,7 +40,7 @@ const STUDIO_LIGHT_CONFIG = {
 const STUDIO_ROTATION_SPEED = 0.018;
 const STUDIO_FOCUS_DURATION = 0.72;
 const STUDIO_INITIAL_FIT_MARGIN = 0.92;
-const STUDIO_MOBILE_FIT_MARGIN = 1.1;
+const STUDIO_MOBILE_FIT_MARGIN = 1.22;
 const STUDIO_MIN_ZOOM = 100;
 const STUDIO_BASE_MAX_ZOOM = 700;
 const STUDIO_MAX_ZOOM = 800;
@@ -510,7 +510,7 @@ function InteractiveStudioModel({
   selection,
 }: InteractiveStudioModelProps) {
   const bounds = useBounds();
-  const { camera, controls, gl } = useThree();
+  const { camera, controls, gl, size } = useThree();
   const isMobile = useThree((state) => state.size.width <= 800);
   const cameraRef = useRef(camera);
   const controlsRef = useRef<StudioOrbitControls | null>(
@@ -597,11 +597,17 @@ function InteractiveStudioModel({
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       model.updateWorldMatrix(true, true);
-      bounds.refresh(model).reset().fit().clip();
+      const box = new THREE.Box3().setFromObject(model);
+      if (isMobile) {
+        // A sphere covers every angle of the automatic rotation, including corners.
+        const sphere = box.getBoundingSphere(new THREE.Sphere());
+        box.setFromCenterAndSize(sphere.center, new THREE.Vector3().setScalar(sphere.radius * 2));
+      }
+      bounds.refresh(box).reset().fit().clip();
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [bounds, model]);
+  }, [bounds, model, isMobile, size.width, size.height]);
 
   useEffect(() => {
     const rotationGroup = rotationRef.current;
@@ -736,7 +742,6 @@ function InteractiveStudioModel({
 
     const rotationGroup = rotationRef.current;
     if (
-      isMobile ||
       !isSceneVisible ||
       !rotationGroup ||
       selection ||
@@ -1007,7 +1012,7 @@ function CameraZoomController({ request }: { request: ZoomRequest }) {
 
       activeCamera.zoom = THREE.MathUtils.clamp(
         activeCamera.zoom * factor,
-        STUDIO_MIN_ZOOM,
+        5,
         STUDIO_MAX_ZOOM,
       );
       activeCamera.updateProjectionMatrix();

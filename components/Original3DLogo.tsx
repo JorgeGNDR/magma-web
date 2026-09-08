@@ -204,6 +204,7 @@ export function Original3DLogo() {
   }, []);
 
   function handlePointerDown(event: ThreeEvent<PointerEvent>) {
+    if (isMobile || event.pointerType === "touch") return;
     const pieceIndex = pieces.findIndex((piece) => piece.mesh === event.object);
     const motion = pieceMotionRef.current[pieceIndex];
     if (pieceIndex < 0 || !motion) return;
@@ -271,17 +272,19 @@ export function Original3DLogo() {
     };
   }, [finishDrag]);
 
+  // Three.js materials and transforms are updated imperatively in the render loop.
+  /* eslint-disable react-hooks/immutability */
   useFrame((_, delta) => {
     const group = motionGroupRef.current;
     if (!group) return;
 
     const safeDelta = Math.min(delta, 1 / 30);
     const scrollDistance = Math.max(
-      window.innerHeight * SCROLL_CONFIG.distance,
+      (isMobile ? document.getElementById("inicio")?.clientHeight ?? window.innerHeight : window.innerHeight) * SCROLL_CONFIG.distance,
       1,
     );
     const rawScrollProgress = THREE.MathUtils.clamp(
-      isMobile ? 0 : window.scrollY / scrollDistance,
+      window.scrollY / scrollDistance,
       0,
       1,
     );
@@ -452,12 +455,27 @@ export function Original3DLogo() {
       piece.mesh.position.add(motion.dragOffset);
     });
 
+    const progress = scrollProgressRef.current;
+    if (isMobile) {
+      // Shrink into depth, keeping the whole lettering within the narrow frustum.
+      group.scale.setScalar(responsiveScale * (1 - progress * 0.35));
+      group.position.set(0, progress * 0.25, -progress * 2);
+      group.rotation.x = -progress * 0.45;
+      material.transparent = true;
+      material.opacity = 1 - THREE.MathUtils.smoothstep(progress, 0.15, 0.95);
+      group.visible = progress < 0.995;
+      return;
+    }
+    material.opacity = 1;
+    material.transparent = false;
     group.scale.setScalar(responsiveScale);
     group.position.z = scrollProgressRef.current * SCROLL_CONFIG.approach;
     group.position.y = -scrollProgressRef.current * SCROLL_CONFIG.exitY;
     group.rotation.x = scrollProgressRef.current * SCROLL_CONFIG.tilt;
     group.visible = scrollProgressRef.current < SCROLL_CONFIG.hideAt;
   });
+
+  /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={motionGroupRef}>

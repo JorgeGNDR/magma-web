@@ -206,9 +206,7 @@ export default function Home() {
           </h1>
 
           <div className={styles.scene}>
-            <MobileSceneControls label="Jugar con el logo">
-              <LogoScene />
-            </MobileSceneControls>
+            <LogoScene />
           </div>
 
           <AudioPlayer />
@@ -248,7 +246,7 @@ export default function Home() {
                 className={styles.studioScene}
                 role="application"
               >
-                <MobileSceneControls label="Explorar el estudio">
+                <MobileSceneControls label="⛶ Pantalla completa">
                   <StudioScene />
                 </MobileSceneControls>
                 <p className={styles.studioHint}>
