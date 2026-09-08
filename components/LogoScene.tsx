@@ -201,6 +201,15 @@ function ReactiveLights() {
 }
 /* eslint-enable react-hooks/immutability */
 
+function LogoInteraction() {
+  const isMobile = useThree((state) => state.size.width <= 800);
+  const setEvents = useThree((state) => state.setEvents);
+  useEffect(() => {
+    setEvents({ enabled: !isMobile });
+  }, [isMobile, setEvents]);
+  return null;
+}
+
 function LogoBackdrop() {
   const isMobile = useThree((state) => state.size.width <= 800);
   return (
@@ -237,6 +246,7 @@ export function LogoScene() {
     >
       <color attach="background" args={[palette.background]} />
       <ReactiveLights />
+      <LogoInteraction />
 
       <LogoBackdrop />
 
