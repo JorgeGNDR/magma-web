@@ -221,10 +221,23 @@
   text-transform: uppercase;
 }
 
-.ticker span::after {
-  content: "✳";
-  font-size: 0.55em;
-  margin: 0 1.2em;
+.tickerSeparator {
+  width: 0.55em;
+  height: 0.55em;
+  margin: 0 0.66em;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.contactArrow svg {
+  display: block;
+  width: 0.8em;
+  height: 0.8em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
 }
 
 .services {
