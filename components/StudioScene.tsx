@@ -40,7 +40,9 @@ const STUDIO_LIGHT_CONFIG = {
 const STUDIO_ROTATION_SPEED = 0.018;
 const STUDIO_FOCUS_DURATION = 0.72;
 const STUDIO_INITIAL_FIT_MARGIN = 0.92;
-const STUDIO_MOBILE_FIT_MARGIN = 1.22;
+// The rotation envelope already reserves space for every angle; this margin
+// enlarges the mobile view by ~20% while keeping that envelope inside the canvas.
+const STUDIO_MOBILE_FIT_MARGIN = 1.02;
 const STUDIO_MIN_ZOOM = 100;
 const STUDIO_BASE_MAX_ZOOM = 700;
 const STUDIO_MAX_ZOOM = 800;
