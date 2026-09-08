@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { AudioPlayer } from "@/components/AudioPlayer";
-import { BeforeAfterPlayer } from "@/components/BeforeAfterPlayer";
 import { LogoScene } from "@/components/LogoScene";
 import { MobileSceneControls } from "@/components/MobileSceneControls";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -370,7 +369,7 @@ export default function Home() {
           <div className={styles.projectIntro}>
             <h2>Trabajos que hemos hecho.</h2>
             <p>
-              Escucha el proceso y descubre una selección de proyectos
+              Descubre una selección de proyectos
               construidos en el estudio.
             </p>
           </div>
@@ -378,16 +377,6 @@ export default function Home() {
           <div className={styles.projectBlock}>
             <div className={styles.projectBlockHeader}>
               <span>(03—A)</span>
-              <h3>Antes / después</h3>
-              <p>Compara el punto de partida con el resultado final</p>
-            </div>
-
-            <BeforeAfterPlayer />
-          </div>
-
-          <div className={styles.projectBlock}>
-            <div className={styles.projectBlockHeader}>
-              <span>(03—B)</span>
               <h3>Últimos trabajos</h3>
               <p>Lo último en salir del horno</p>
             </div>
