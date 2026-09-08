@@ -100,7 +100,7 @@ export function Original3DLogo() {
   const viewportWidth = useThree((state) => state.viewport.width);
   const camera = useThree((state) => state.camera);
   const isMobile = useThree((state) => state.size.width <= 800);
-  const responsiveScale = Math.min(1, viewportWidth / 7.2);
+  const responsiveScale = Math.min(1, viewportWidth / (isMobile ? 8.5 : 7.2));
   const motionGroupRef = useRef<THREE.Group>(null);
   const scrollProgressRef = useRef(0);
   const pieceMotionRef = useRef<PieceMotion[]>([]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { audioSignal } from "./audioSignal";
 import { Original3DLogo } from "./Original3DLogo";
@@ -201,6 +201,16 @@ function ReactiveLights() {
 }
 /* eslint-enable react-hooks/immutability */
 
+function LogoBackdrop() {
+  const isMobile = useThree((state) => state.size.width <= 800);
+  return (
+    <mesh position={[0, 0, -0.25]} receiveShadow={!isMobile}>
+      <planeGeometry args={[24, 14]} />
+      <meshStandardMaterial color={palette.background} roughness={1} />
+    </mesh>
+  );
+}
+
 export function LogoScene() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
@@ -228,10 +238,7 @@ export function LogoScene() {
       <color attach="background" args={[palette.background]} />
       <ReactiveLights />
 
-      <mesh position={[0, 0, -0.25]} receiveShadow>
-        <planeGeometry args={[24, 14]} />
-        <meshStandardMaterial color={palette.background} roughness={1} />
-      </mesh>
+      <LogoBackdrop />
 
       <Suspense fallback={null}>
         <Original3DLogo />
