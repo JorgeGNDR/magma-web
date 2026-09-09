@@ -7,8 +7,14 @@ import styles from "./SectionTransition.module.css";
 const COLUMN_COUNT = 10;
 const CELL_FADE_MS = 20;
 const TRANSITION_BUFFER_MS = 50;
-const DESKTOP_MOTION_QUERY =
-  "(min-width: 801px) and (prefers-reduced-motion: no-preference)";
+const MOTION_QUERY =
+  "(prefers-reduced-motion: no-preference)";
+
+const NAVIGATION_EVENT = "magma:section-navigation";
+
+export function navigateWithSectionTransition(hash: string) {
+  window.dispatchEvent(new CustomEvent<string>(NAVIGATION_EVENT, { detail: hash }));
+}
 
 type TransitionPhase = "idle" | "covering" | "revealing";
 
@@ -99,7 +105,7 @@ export function SectionTransition() {
   }, [longestDelayMs]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia(DESKTOP_MOTION_QUERY);
+    const mediaQuery = window.matchMedia(MOTION_QUERY);
     const updateEnabledState = () => setIsEnabled(mediaQuery.matches);
 
     updateEnabledState();
@@ -156,9 +162,17 @@ export function SectionTransition() {
       const target = document.querySelector<HTMLElement>(hash);
       if (!target) return;
 
-      if (!window.matchMedia(DESKTOP_MOTION_QUERY).matches) return;
+      if (!window.matchMedia(MOTION_QUERY).matches) return;
 
       event.preventDefault();
+      await transitionToSection(target, hash);
+    };
+
+    const transitionToSection = async (target: HTMLElement, hash: string) => {
+      if (!window.matchMedia(MOTION_QUERY).matches) {
+        jumpToSection(target, hash);
+        return;
+      }
       if (runningRef.current) return;
 
       runningRef.current = true;
@@ -178,10 +192,18 @@ export function SectionTransition() {
       runningRef.current = false;
     };
 
+    const handleNavigation = (event: Event) => {
+      const hash = (event as CustomEvent<string>).detail;
+      const target = document.getElementById(hash.slice(1));
+      if (target) void transitionToSection(target, hash);
+    };
+    window.addEventListener(NAVIGATION_EVENT, handleNavigation);
+
     document.addEventListener("click", handleClick);
 
     return () => {
       document.removeEventListener("click", handleClick);
+      window.removeEventListener(NAVIGATION_EVENT, handleNavigation);
       timerIdsRef.current.forEach((timerId) => window.clearTimeout(timerId));
       timerIdsRef.current = [];
     };

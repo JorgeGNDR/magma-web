@@ -2,6 +2,7 @@
 
 import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { navigateWithSectionTransition } from "./SectionTransition";
 import menuStyles from "./MobileMenu.module.css";
 import styles from "@/app/page.module.css";
 
@@ -49,12 +50,8 @@ export function SiteHeader() {
     const id = pendingSectionRef.current;
     const frame = window.requestAnimationFrame(() => {
       pendingSectionRef.current = null;
-      const section = document.getElementById(id);
-      if (!section) return;
-      if (window.location.hash !== `#${id}`) window.history.pushState(null, "", `#${id}`);
-      // Run after the dialog unmounts and restores scrolling. The global CSS
-      // supplies the same smooth motion (and reduced-motion preference) as desktop.
-      section.scrollIntoView({ behavior: "auto", block: "start" });
+      // Start the shared pixel transition after the modal releases the page.
+      navigateWithSectionTransition(`#${id}`);
     });
     return () => window.cancelAnimationFrame(frame);
   }, [menuOpen]);
