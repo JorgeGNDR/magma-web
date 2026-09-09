@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import menuStyles from "./MobileMenu.module.css";
 import styles from "@/app/page.module.css";
@@ -35,6 +35,29 @@ function getHeaderSurface(): HeaderSurface {
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDialogElement>(null);
+  const pendingSectionRef = useRef<string | null>(null);
+
+  function navigateFromMenu(event: MouseEvent<HTMLAnchorElement>, id: string) {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    pendingSectionRef.current = id;
+    setMenuOpen(false);
+  }
+
+  useEffect(() => {
+    if (menuOpen || !pendingSectionRef.current) return;
+    const id = pendingSectionRef.current;
+    const frame = window.requestAnimationFrame(() => {
+      pendingSectionRef.current = null;
+      const section = document.getElementById(id);
+      if (!section) return;
+      if (window.location.hash !== `#${id}`) window.history.pushState(null, "", `#${id}`);
+      // Run after the dialog unmounts and restores scrolling. The global CSS
+      // supplies the same smooth motion (and reduced-motion preference) as desktop.
+      section.scrollIntoView({ behavior: "auto", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [menuOpen]);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -139,14 +162,14 @@ export function SiteHeader() {
       {menuOpen && createPortal(
         <dialog ref={menuRef} id="mobile-navigation" className={menuStyles.menu} aria-label="Menú de navegación" onCancel={() => setMenuOpen(false)}>
           <div className={menuStyles.top}>
-            <a className={styles.brand} href="#inicio" onClick={() => setMenuOpen(false)} aria-label="MAGMA, inicio">MAGMA<sup>®</sup></a>
+            <a className={styles.brand} href="#inicio" onClick={(event) => navigateFromMenu(event, "inicio")} aria-label="MAGMA, inicio">MAGMA<sup>®</sup></a>
             <button autoFocus type="button" className={menuStyles.close} aria-label="Cerrar menú" onClick={() => setMenuOpen(false)}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
             </button>
           </div>
           <nav className={menuStyles.links} aria-label="Navegación móvil">
             {[['estudio', 'Estudio'], ['servicios', 'Servicios'], ['proyectos', 'Proyectos'], ['contacto', 'Contacto']].map(([id, title], index) => (
-              <a key={id} href={`#${id}`} onClick={() => setMenuOpen(false)}><span>0{index + 1}</span>{title}</a>
+              <a key={id} href={`#${id}`} onClick={(event) => navigateFromMenu(event, id)}><span>0{index + 1}</span>{title}</a>
             ))}
           </nav>
           <p className={menuStyles.footer}>Estudio independiente<br />de música contemporánea</p>
