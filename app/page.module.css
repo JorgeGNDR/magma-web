@@ -825,7 +825,7 @@
   }
 
   .navigation {
-    display: flex;
+    display: none;
     grid-row: 2;
     grid-column: 1 / -1;
     justify-content: space-between;
@@ -841,6 +841,7 @@
   }
 
   .availability {
+    display: none;
     font-size: 0;
   }
 

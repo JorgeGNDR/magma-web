@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import menuStyles from "./MobileMenu.module.css";
 import styles from "@/app/page.module.css";
 
 const TOP_THRESHOLD = 24;
@@ -31,6 +33,26 @@ function getHeaderSurface(): HeaderSurface {
 }
 
 export function SiteHeader() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDialogElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const trigger = menuButtonRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    menuRef.current?.showModal();
+    const desktop = window.matchMedia("(min-width: 801px)");
+    const closeOnDesktop = () => { if (desktop.matches) setMenuOpen(false); };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      desktop.removeEventListener("change", closeOnDesktop);
+      trigger?.focus({ preventScroll: true });
+    };
+  }, [menuOpen]);
+
   const [isVisible, setIsVisible] = useState(true);
   const [surface, setSurface] = useState<HeaderSurface>("light");
   const lastScrollYRef = useRef(0);
@@ -79,7 +101,7 @@ export function SiteHeader() {
     <header
       className={styles.header}
       data-surface={surface}
-      data-visible={isVisible}
+      data-visible={isVisible || menuOpen}
     >
       <a className={styles.brand} href="#inicio" aria-label="MAGMA, inicio">
         MAGMA<sup>®</sup>
@@ -102,6 +124,34 @@ export function SiteHeader() {
           <span>Contacto</span>
         </a>
       </nav>
+
+      <button
+        ref={menuButtonRef}
+        className={menuStyles.trigger}
+        type="button"
+        aria-label="Abrir menú"
+        aria-expanded={menuOpen}
+        aria-controls="mobile-navigation"
+        aria-haspopup="dialog"
+        onClick={() => setMenuOpen(true)}
+      ><span className={styles.availabilityDot} aria-hidden="true" /></button>
+
+      {menuOpen && createPortal(
+        <dialog ref={menuRef} id="mobile-navigation" className={menuStyles.menu} aria-label="Menú de navegación" onCancel={() => setMenuOpen(false)}>
+          <div className={menuStyles.top}>
+            <a className={styles.brand} href="#inicio" onClick={() => setMenuOpen(false)} aria-label="MAGMA, inicio">MAGMA<sup>®</sup></a>
+            <button autoFocus type="button" className={menuStyles.close} aria-label="Cerrar menú" onClick={() => setMenuOpen(false)}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
+            </button>
+          </div>
+          <nav className={menuStyles.links} aria-label="Navegación móvil">
+            {[['estudio', 'Estudio'], ['servicios', 'Servicios'], ['proyectos', 'Proyectos'], ['contacto', 'Contacto']].map(([id, title], index) => (
+              <a key={id} href={`#${id}`} onClick={() => setMenuOpen(false)}><span>0{index + 1}</span>{title}</a>
+            ))}
+          </nav>
+          <p className={menuStyles.footer}>Estudio independiente<br />de música contemporánea</p>
+        </dialog>, document.body,
+      )}
 
       <a className={styles.availability} href="#contacto">
         <span className={styles.availabilityDot} aria-hidden="true" />
