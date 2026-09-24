@@ -5,6 +5,7 @@ import { type ThreeEvent, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { audioSignal } from "./audioSignal";
+import { createLogoCollider, getLogoContact, type LogoCollider } from "./logoCollision";
 import { palette } from "./palette";
 
 const MODEL_URL = "/magma-logo.glb";
@@ -53,8 +54,6 @@ const DRAG_CONFIG = {
 const COLLISION_CONFIG = {
   impulse: 7,
   iterations: 4,
-  radiusScale: 0.82,
-  restSpacing: 0.92,
   transfer: 0.72,
 } as const;
 
@@ -62,7 +61,7 @@ type LogoPiece = {
   basePosition: THREE.Vector3;
   center: THREE.Vector2;
   centerX: number;
-  collisionRadius: number;
+  collider: LogoCollider;
   mesh: THREE.Mesh;
   spreadDirection: THREE.Vector2;
 };
@@ -70,7 +69,7 @@ type LogoPiece = {
 type CollisionPair = {
   indexA: number;
   indexB: number;
-  minimumDistance: number;
+  restPenetration: number;
 };
 
 type PieceMotion = {
@@ -152,8 +151,7 @@ export function Original3DLogo() {
         basePosition: child.position.clone(),
         center: new THREE.Vector2(centerX, centerZ),
         centerX,
-        collisionRadius:
-          Math.max(geometrySize.x, geometrySize.z) * 0.5,
+        collider: createLogoCollider(child),
         mesh: child,
         spreadDirection,
       });
@@ -165,21 +163,9 @@ export function Original3DLogo() {
 
     for (let indexA = 0; indexA < nextPieces.length; indexA += 1) {
       for (let indexB = indexA + 1; indexB < nextPieces.length; indexB += 1) {
-        const pieceA = nextPieces[indexA];
-        const pieceB = nextPieces[indexB];
-        const restDistance = pieceA.center.distanceTo(pieceB.center);
-        const radiusDistance =
-          (pieceA.collisionRadius + pieceB.collisionRadius) *
-          COLLISION_CONFIG.radiusScale;
-
-        nextCollisionPairs.push({
-          indexA,
-          indexB,
-          minimumDistance: Math.min(
-            restDistance * COLLISION_CONFIG.restSpacing,
-            radiusDistance,
-          ),
-        });
+        // Preserve any tiny overlaps already authored into the resting logo.
+        const restContact = getLogoContact(nextPieces[indexA].collider, 0, 0, nextPieces[indexB].collider, 0, 0);
+        nextCollisionPairs.push({ indexA, indexB, restPenetration: restContact?.depth ?? 0 });
       }
     }
 
@@ -370,43 +356,23 @@ export function Original3DLogo() {
       iteration < COLLISION_CONFIG.iterations;
       iteration += 1
     ) {
-      collisionPairs.forEach(({ indexA, indexB, minimumDistance }) => {
+      collisionPairs.forEach(({ indexA, indexB, restPenetration }) => {
         const pieceA = pieces[indexA];
         const pieceB = pieces[indexB];
         const motionA = pieceMotionRef.current[indexA];
         const motionB = pieceMotionRef.current[indexB];
 
-        const positionAX =
-          pieceA.center.x +
-          motionA.dragOffset.x +
-          pieceA.spreadDirection.x * motionA.offset * AUDIO_CONFIG.spread;
-        const positionAZ =
-          pieceA.center.y +
-          motionA.dragOffset.z +
-          pieceA.spreadDirection.y * motionA.offset * AUDIO_CONFIG.spread;
-        const positionBX =
-          pieceB.center.x +
-          motionB.dragOffset.x +
-          pieceB.spreadDirection.x * motionB.offset * AUDIO_CONFIG.spread;
-        const positionBZ =
-          pieceB.center.y +
-          motionB.dragOffset.z +
-          pieceB.spreadDirection.y * motionB.offset * AUDIO_CONFIG.spread;
-        const deltaX = positionBX - positionAX;
-        const deltaZ = positionBZ - positionAZ;
-        const distance = Math.hypot(deltaX, deltaZ);
-
-        if (distance >= minimumDistance) return;
-
-        const fallbackX = pieceB.center.x - pieceA.center.x;
-        const fallbackZ = pieceB.center.y - pieceA.center.y;
-        const fallbackLength = Math.hypot(fallbackX, fallbackZ) || 1;
-        const normalX =
-          distance > 0.00001 ? deltaX / distance : fallbackX / fallbackLength;
-        const normalZ =
-          distance > 0.00001 ? deltaZ / distance : fallbackZ / fallbackLength;
-        const correction =
-          (minimumDistance - distance) * COLLISION_CONFIG.transfer;
+        const contact = getLogoContact(
+          pieceA.collider,
+          motionA.dragOffset.x + pieceA.spreadDirection.x * motionA.offset * AUDIO_CONFIG.spread,
+          motionA.dragOffset.z + pieceA.spreadDirection.y * motionA.offset * AUDIO_CONFIG.spread,
+          pieceB.collider,
+          motionB.dragOffset.x + pieceB.spreadDirection.x * motionB.offset * AUDIO_CONFIG.spread,
+          motionB.dragOffset.z + pieceB.spreadDirection.y * motionB.offset * AUDIO_CONFIG.spread,
+        );
+        if (!contact || contact.depth <= restPenetration) return;
+        const { normalX, normalZ } = contact;
+        const correction = (contact.depth - restPenetration) * COLLISION_CONFIG.transfer;
 
         if (motionA.dragging && !motionB.dragging) {
           motionB.dragOffset.x += normalX * correction;
