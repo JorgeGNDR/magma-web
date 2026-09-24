@@ -338,16 +338,14 @@ export default function Home() {
             <div className={styles.projectList}>
               {projects.map((project) => (
                 <article className={styles.projectEntry} key={project.title}>
-                <a
-                  aria-label={`Escuchar ${project.title} de ${project.artist} en Spotify`}
-                  className={styles.projectRow}
-                  href={project.href}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  <h4>{project.title}</h4>
-                  <p>{project.service}</p>
-                </a>
+                  <div className={styles.projectDetails}>
+                    <h4>
+                      <a href={project.href} target="_blank" rel="noreferrer">
+                        {project.title}
+                      </a>
+                    </h4>
+                    <p>{project.service}</p>
+                  </div>
                 <iframe
                   className={styles.spotifyPlayer}
                   src={`${project.href.replace("open.spotify.com/", "open.spotify.com/embed/")}?utm_source=generator&theme=0`}
