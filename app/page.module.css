@@ -250,15 +250,15 @@
 }
 
 .serviceIntro {
-  align-items: end;
+  align-items: start;
   display: grid;
-  gap: clamp(3rem, 7vw, 8rem);
-  grid-template-columns: minmax(0, 3fr) minmax(18rem, 1fr);
-  margin: clamp(5rem, 9vw, 8rem) 0 clamp(3rem, 5vw, 5rem);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  margin: clamp(3rem, 5vw, 5rem) 0 clamp(2.5rem, 4vw, 4rem);
 }
 
 .serviceIntro h2 {
-  font-size: clamp(3.4rem, 6.8vw, 7rem);
+  font-size: clamp(3.4rem, 6.2vw, 6.5rem);
   font-weight: 500;
   letter-spacing: -0.075em;
   line-height: 0.84;
@@ -459,23 +459,26 @@
 
 .projectIntro {
   display: grid;
-  gap: 2rem;
-  grid-template-columns: 3fr 1fr;
-  margin: 8rem 0 6rem;
+  align-items: start;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  margin: clamp(3rem, 5vw, 5rem) 0 clamp(2.5rem, 4vw, 4rem);
 }
 
 .projectIntro h2 {
-  font-size: clamp(3rem, 8vw, 8rem);
+  font-size: clamp(3.4rem, 6.2vw, 6.5rem);
   font-weight: 500;
   letter-spacing: -0.07em;
   line-height: 0.85;
-  max-width: 12ch;
+  max-width: 14ch;
   text-transform: uppercase;
 }
 
 .projectIntro p {
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  letter-spacing: -0.02em;
   line-height: 1.45;
-  max-width: 22rem;
+  max-width: 27rem;
 }
 
 .projectBlock {
@@ -1244,7 +1247,7 @@
 
 .projectDetails h4 {
   margin: 0;
-  font-size: clamp(1.4rem, 2vw, 2.1rem);
+  font-size: clamp(2rem, 3vw, 3.25rem);
   font-weight: 500;
   line-height: 1.1;
   letter-spacing: -0.04em;
@@ -1263,11 +1266,11 @@
 .projectDetails a:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }
 
 .projectDetails p {
-  max-width: 24rem;
-  margin-top: 0.8rem;
+  max-width: 32rem;
+  margin-top: 1rem;
   font-family: var(--font-geist-mono);
-  font-size: 0.65rem;
-  line-height: 1.8;
+  font-size: clamp(0.8rem, 1vw, 1rem);
+  line-height: 1.65;
   letter-spacing: 0.025em;
   text-transform: uppercase;
   color: rgb(19 19 19 / 75%);
@@ -1286,6 +1289,6 @@
     gap: 1rem;
     padding: 1.5rem 0;
   }
-  .projectDetails h4 { font-size: 1.45rem; }
-  .projectDetails p { margin-top: 0.45rem; font-size: 0.6rem; }
+  .projectDetails h4 { font-size: clamp(1.8rem, 7vw, 2.4rem); }
+  .projectDetails p { margin-top: 0.65rem; font-size: 0.8rem; }
 }

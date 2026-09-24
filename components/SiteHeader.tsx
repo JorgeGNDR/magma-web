@@ -136,8 +136,8 @@ export function SiteHeader() {
           <span>Servicios</span>
         </a>
 
-        <a href="#proyectos" data-label="Proyectos">
-          <span>Proyectos</span>
+        <a href="#proyectos" data-label="Trabajos">
+          <span>Trabajos</span>
         </a>
 
         <a href="#contacto" data-label="Contacto">
@@ -165,7 +165,7 @@ export function SiteHeader() {
             </button>
           </div>
           <nav className={menuStyles.links} aria-label="Navegación móvil">
-            {[['estudio', 'Estudio'], ['servicios', 'Servicios'], ['proyectos', 'Proyectos'], ['contacto', 'Contacto']].map(([id, title], index) => (
+            {[['estudio', 'Estudio'], ['servicios', 'Servicios'], ['proyectos', 'Trabajos'], ['contacto', 'Contacto']].map(([id, title], index) => (
               <a key={id} href={`#${id}`} onClick={(event) => navigateFromMenu(event, id)}><span>0{index + 1}</span>{title}</a>
             ))}
           </nav>
