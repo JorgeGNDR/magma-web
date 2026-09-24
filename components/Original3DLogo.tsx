@@ -47,13 +47,14 @@ const AUDIO_CONFIG = {
 
 const DRAG_CONFIG = {
   followResponse: 24,
-  returnDamping: 9,
-  returnSpring: 52,
+  // Lower damping preserves motion; a softer spring presses pieces together less.
+  returnDamping: 6,
+  returnSpring: 32,
 } as const;
 
 const COLLISION_CONFIG = {
-  impulse: 7,
-  iterations: 4,
+  impulse: 4.5,
+  iterations: 6,
   transfer: 0.72,
 } as const;
 
