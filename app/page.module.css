@@ -406,7 +406,8 @@
   margin-top: clamp(4rem, 8vw, 8rem);
 }
 
-.service {
+.service,
+.projectEntry {
   align-items: start;
   border-top: 1px solid currentColor;
   display: grid;
@@ -424,7 +425,8 @@
   font-size: 0.68rem;
 }
 
-.service h3 {
+.service h3,
+.projectDetails h4 {
   font-size: clamp(2rem, 4.8vw, 5rem);
   font-weight: 500;
   letter-spacing: -0.06em;
@@ -1234,25 +1236,12 @@
   .navigation a:hover span { transform: none; }
 }
 
-.projectEntry {
-  display: grid;
-  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(2rem, 5vw, 6rem);
-  padding: 1.75rem 0;
-  border-top: 1px solid rgb(19 19 19 / 25%);
+.projectDetails {
+  grid-column: 2;
+  min-width: 0;
 }
 
-.projectDetails { min-width: 0; }
-
-.projectDetails h4 {
-  margin: 0;
-  font-size: clamp(2rem, 3vw, 3.25rem);
-  font-weight: 500;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  text-transform: uppercase;
-}
+.projectDetails h4 { margin: 0; }
 
 .projectDetails a {
   text-decoration: underline;
@@ -1277,6 +1266,8 @@
 }
 
 .spotifyPlayer {
+  grid-column: 3;
+  align-self: start;
   display: block;
   border: 0;
   border-radius: 12px;
@@ -1285,10 +1276,11 @@
 
 @media (max-width: 800px) {
   .projectEntry {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 2.5rem minmax(0, 1fr);
     gap: 1rem;
-    padding: 1.5rem 0;
+    padding: 1rem 0 2rem;
   }
-  .projectDetails h4 { font-size: clamp(1.8rem, 7vw, 2.4rem); }
+  .spotifyPlayer { grid-column: 2; }
+  .projectDetails h4 { font-size: clamp(1.45rem, 6.3vw, 2rem); line-height: 1.05; }
   .projectDetails p { margin-top: 0.65rem; font-size: 0.8rem; }
 }
