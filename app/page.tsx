@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { LogoScene } from "@/components/LogoScene";
 import { MobileSceneControls } from "@/components/MobileSceneControls";
@@ -337,7 +336,7 @@ export default function Home() {
             </div>
 
             <div className={styles.projectList}>
-              {projects.map((project, index) => (
+              {projects.map((project) => (
                 <article className={styles.projectEntry} key={project.title}>
                 <a
                   aria-label={`Escuchar ${project.title} de ${project.artist} en Spotify`}
@@ -346,23 +345,8 @@ export default function Home() {
                   rel="noreferrer"
                   target="_blank"
                 >
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <span className={styles.projectCover}>
-                    <Image
-                      alt=""
-                      height={300}
-                      sizes="(max-width: 800px) 48px, 60px"
-                      src={project.image}
-                      width={300}
-                    />
-                  </span>
-                  <div>
-                    <h4>{project.title}</h4>
-                    <p>{project.artist}</p>
-                  </div>
+                  <h4>{project.title}</h4>
                   <p>{project.service}</p>
-                  <time dateTime={project.date}>{project.dateLabel}</time>
-                  <span aria-hidden="true">↗</span>
                 </a>
                 <iframe
                   className={styles.spotifyPlayer}
