@@ -102,15 +102,6 @@ const tickerItems = [
 
 const projects = [
   {
-    artist: "Wachu",
-    date: "2026-05-14",
-    dateLabel: "14.05.2026",
-    href: "https://open.spotify.com/album/1mRZhfBK8j1wv3NHB5aWL4",
-    image: "/projects/exploit.jpg",
-    service: "Producción · Grabación · Mezcla · Mastering",
-    title: "EXPLOIT",
-  },
-  {
     artist: "Rever, Wachu",
     date: "2026-07-10",
     dateLabel: "10.07.2026",
@@ -118,42 +109,6 @@ const projects = [
     image: "/projects/muevelo.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "MUEVELO",
-  },
-  {
-    artist: "ABBYY, Rever",
-    date: "2026-06-10",
-    dateLabel: "10.06.2026",
-    href: "https://open.spotify.com/track/7j2mS1rUsR1jLQKDQIymos",
-    image: "/projects/hacerlo-asi.jpg",
-    service: "Grabación",
-    title: "hacerlo así",
-  },
-  {
-    artist: "LukaTony",
-    date: "2026-06-05",
-    dateLabel: "05.06.2026",
-    href: "https://open.spotify.com/album/4GT7gvHB4ebmuyg1ihii33",
-    image: "/projects/slalom.jpg",
-    service: "Grabación · Mezcla · Mastering",
-    title: "SLALOM",
-  },
-  {
-    artist: "Vitala",
-    date: "2026-04-02",
-    dateLabel: "02.04.2026",
-    href: "https://open.spotify.com/track/6QMXsxNJ7ZSosdnI0dtpRR",
-    image: "/projects/ya-no.jpg",
-    service: "Mezcla · Mastering",
-    title: "Ya no...",
-  },
-  {
-    artist: "Rever, Devonté, Wachu",
-    date: "2026-03-25",
-    dateLabel: "25.03.2026",
-    href: "https://open.spotify.com/track/01fCWxTX4bdYyXFhuaUn75",
-    image: "/projects/cuando-nos-mentimos.jpg",
-    service: "Producción · Mezcla · Mastering",
-    title: "Cuando nos mentimos",
   },
   {
     artist: "Rever, Wachu, LKTN",
@@ -165,13 +120,22 @@ const projects = [
     title: "Cuando te veo",
   },
   {
-    artist: "Rever",
-    date: "2025-11-26",
-    dateLabel: "26.11.2025",
-    href: "https://open.spotify.com/album/2DR9ZmoOEYzX0pmV6C1x0b",
-    image: "/projects/sin-luz.jpg",
-    service: "Grabación · Mezcla · Mastering",
-    title: "Sin luz",
+    artist: "Mushkilla, Wachu, Vitala",
+    date: "2025-09-24",
+    dateLabel: "24.09.2025",
+    href: "https://open.spotify.com/track/78HYzb9mMmAlu23NDLhxud",
+    image: "/projects/club-one.jpg",
+    service: "Producción · Grabación · Mezcla · Mastering",
+    title: "Club One",
+  },
+  {
+    artist: "Wachu",
+    date: "2026-05-14",
+    dateLabel: "14.05.2026",
+    href: "https://open.spotify.com/album/1mRZhfBK8j1wv3NHB5aWL4",
+    image: "/projects/exploit.jpg",
+    service: "Producción · Grabación · Mezcla · Mastering",
+    title: "EXPLOIT",
   },
   {
     artist: "Rever, Wachu",
@@ -182,16 +146,7 @@ const projects = [
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "Siempre es tarde",
   },
-  {
-    artist: "Mushkilla, Wachu, Vitala",
-    date: "2025-09-24",
-    dateLabel: "24.09.2025",
-    href: "https://open.spotify.com/track/78HYzb9mMmAlu23NDLhxud",
-    image: "/projects/club-one.jpg",
-    service: "Producción · Grabación · Mezcla · Mastering",
-    title: "Club One",
-  },
-].sort((projectA, projectB) => projectB.date.localeCompare(projectA.date));
+];
 
 export default function Home() {
   return (
@@ -383,11 +338,11 @@ export default function Home() {
 
             <div className={styles.projectList}>
               {projects.map((project, index) => (
+                <article className={styles.projectEntry} key={project.title}>
                 <a
                   aria-label={`Escuchar ${project.title} de ${project.artist} en Spotify`}
                   className={styles.projectRow}
                   href={project.href}
-                  key={project.title}
                   rel="noreferrer"
                   target="_blank"
                 >
@@ -409,6 +364,17 @@ export default function Home() {
                   <time dateTime={project.date}>{project.dateLabel}</time>
                   <span aria-hidden="true">↗</span>
                 </a>
+                <iframe
+                  className={styles.spotifyPlayer}
+                  src={`${project.href.replace("open.spotify.com/", "open.spotify.com/embed/")}?utm_source=generator&theme=0`}
+                  title={`Reproductor de Spotify: ${project.title} — ${project.artist}`}
+                  width="100%"
+                  height="152"
+                  loading="lazy"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+                </article>
               ))}
             </div>
           </div>

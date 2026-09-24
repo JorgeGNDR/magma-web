@@ -1230,3 +1230,26 @@
   .navigation a::before { display: none; }
   .navigation a:hover span { transform: none; }
 }
+
+.projectEntry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+  align-items: center;
+  gap: 2rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid currentColor;
+}
+.projectEntry .projectRow {
+  border-top: 0;
+  grid-template-columns: 2rem 3.75rem minmax(0, 1fr);
+  gap: 0.6rem 1rem;
+  padding: 0.75rem 0;
+}
+.projectEntry .projectRow > p,
+.projectEntry .projectRow time { grid-column: 3; }
+.projectEntry .projectRow > span:last-child { display: none; }
+.spotifyPlayer { display: block; border: 0; border-radius: 12px; min-width: 0; }
+@media (max-width: 800px) {
+  .projectEntry { grid-template-columns: minmax(0, 1fr); gap: 0.75rem; }
+  .projectEntry .projectRow { grid-template-columns: 1.5rem 3rem minmax(0, 1fr); }
+}
