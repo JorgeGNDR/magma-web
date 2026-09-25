@@ -3,19 +3,25 @@ import * as THREE from "three";
 // Project the real mesh onto the logo's X/Z interaction plane. A fine occupancy
 // grid preserves concavities and holes, unlike circles or a convex hull.
 const RESOLUTION = 96;
-// Round only small contour details (~2% of the piece width), preserving holes.
-const ROUNDING_RADIUS = 2;
+// Higher radius softens protrusions and narrow notches while retaining the silhouette.
+const ROUNDING_RADIUS = 6;
 
 function roundCollisionMask(mask: Uint8Array, width: number, height: number) {
   const rounded = new Uint8Array(mask.length);
-  const weights = [1, 4, 6, 4, 1];
+  const sigma = ROUNDING_RADIUS / 2;
+  const weights = Array.from({ length: ROUNDING_RADIUS * 2 + 1 }, (_, i) =>
+    Math.exp(-((i - ROUNDING_RADIUS) ** 2) / (2 * sigma * sigma)),
+  );
+  const threshold = weights.reduce((sum, weight) => sum + weight, 0) ** 2 / 2;
   for (let z = ROUNDING_RADIUS; z < height - ROUNDING_RADIUS; z++) {
     for (let x = ROUNDING_RADIUS; x < width - ROUNDING_RADIUS; x++) {
       let coverage = 0;
-      for (let dz = -2; dz <= 2; dz++) for (let dx = -2; dx <= 2; dx++) {
-        coverage += mask[(z + dz) * width + x + dx] * weights[dx + 2] * weights[dz + 2];
+      for (let dz = -ROUNDING_RADIUS; dz <= ROUNDING_RADIUS; dz++) {
+        for (let dx = -ROUNDING_RADIUS; dx <= ROUNDING_RADIUS; dx++) {
+          coverage += mask[(z + dz) * width + x + dx] * weights[dx + ROUNDING_RADIUS] * weights[dz + ROUNDING_RADIUS];
+        }
       }
-      rounded[z * width + x] = coverage >= 128 ? 1 : 0;
+      rounded[z * width + x] = coverage >= threshold ? 1 : 0;
     }
   }
   return rounded;
@@ -37,9 +43,10 @@ export function createLogoCollider(mesh: THREE.Mesh): LogoCollider {
     vertices.push(v); box.expandByPoint(v);
   }
   const step = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / RESOLUTION;
-  const minX = box.min.x - step * 2, minZ = box.min.z - step * 2;
-  const width = Math.ceil((box.max.x - minX) / step) + 2;
-  const height = Math.ceil((box.max.z - minZ) / step) + 2;
+  const padding = ROUNDING_RADIUS + 2;
+  const minX = box.min.x - step * padding, minZ = box.min.z - step * padding;
+  const width = Math.ceil((box.max.x - minX) / step) + padding;
+  const height = Math.ceil((box.max.z - minZ) / step) + padding;
   let mask = new Uint8Array(width * height);
   const indices = mesh.geometry.index;
   const count = indices?.count ?? positions.count;
