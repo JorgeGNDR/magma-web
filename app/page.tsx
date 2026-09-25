@@ -2,7 +2,7 @@ import { AudioPlayer } from "@/components/AudioPlayer";
 import { LogoScene } from "@/components/LogoScene";
 import { MobileSceneControls } from "@/components/MobileSceneControls";
 import { SiteHeader } from "@/components/SiteHeader";
-import { StudioScene } from "@/components/StudioScene";
+import { DeferredStudio } from "@/components/DeferredStudio";
 import styles from "./page.module.css";
 
 const QUOTE_EMAIL = "magmastudio46520@gmail.com";
@@ -105,7 +105,6 @@ const projects = [
     date: "2026-07-10",
     dateLabel: "10.07.2026",
     href: "https://open.spotify.com/track/78iB1CQ5KaQXwqseyLEz27",
-    image: "/projects/muevelo.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "MUEVELO",
   },
@@ -114,7 +113,6 @@ const projects = [
     date: "2025-12-18",
     dateLabel: "18.12.2025",
     href: "https://open.spotify.com/track/5U4Jz9wK5IGT6Pv8CFkFub",
-    image: "/projects/cuando-te-veo.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "Cuando te veo",
   },
@@ -123,7 +121,6 @@ const projects = [
     date: "2025-09-24",
     dateLabel: "24.09.2025",
     href: "https://open.spotify.com/track/78HYzb9mMmAlu23NDLhxud",
-    image: "/projects/club-one.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "Club One",
   },
@@ -132,7 +129,6 @@ const projects = [
     date: "2026-05-14",
     dateLabel: "14.05.2026",
     href: "https://open.spotify.com/album/1mRZhfBK8j1wv3NHB5aWL4",
-    image: "/projects/exploit.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "EXPLOIT",
   },
@@ -141,7 +137,6 @@ const projects = [
     date: "2025-10-30",
     dateLabel: "30.10.2025",
     href: "https://open.spotify.com/track/0XMseX9Iomuwt8Dg8kb9Dc",
-    image: "/projects/siempre-es-tarde.jpg",
     service: "Producción · Grabación · Mezcla · Mastering",
     title: "Siempre es tarde",
   },
@@ -200,7 +195,7 @@ export default function Home() {
                 role="application"
               >
                 <MobileSceneControls label="⛶ Pantalla completa">
-                  <StudioScene />
+                  <DeferredStudio />
                 </MobileSceneControls>
                 <p className={styles.studioHint}>
                   <span className={styles.desktopHint}>
@@ -398,7 +393,6 @@ export default function Home() {
                 value="Nuevo proyecto desde la web de MAGMA"
               />
               <input name="_template" type="hidden" value="table" />
-              <input name="_captcha" type="hidden" value="false" />
               <input
                 aria-hidden="true"
                 autoComplete="off"

@@ -227,7 +227,9 @@ export function LogoScene() {
     const observer = new IntersectionObserver(([entry]) => {
       setVisible(entry.isIntersecting);
     });
-    if (rootRef.current) observer.observe(rootRef.current);
+    // The canvas is fixed, so observe the hero instead of the always-visible canvas.
+    const hero = document.getElementById("inicio");
+    if (hero) observer.observe(hero);
     return () => observer.disconnect();
   }, []);
   return (

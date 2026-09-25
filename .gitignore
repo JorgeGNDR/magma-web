@@ -42,3 +42,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local package cache and private working files
+.pnpm-store/
+*.key
+*.p12
+*.pfx
+*.bak
+*.log
