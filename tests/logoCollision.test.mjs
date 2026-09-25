@@ -17,3 +17,11 @@ assert.equal(getLogoContact(ring,0,0,small,0,0),null);
 assert.ok(getLogoContact(ring,0,0,small,.5,0));
 assert.ok(getLogoContact(box,0,0,small,0,0));
 console.log('PASS: separation, contact depth/direction, empty hole, inner edge, containment');
+// The outermost corner is rounded while the middle of a straight edge stays solid.
+const depthAt = (collider, x, z) => collider.depth[
+  Math.floor((z - collider.minZ) / collider.step) * collider.width +
+  Math.floor((x - collider.minX) / collider.step)
+];
+assert.equal(depthAt(box, .99, .49), 0);
+assert.ok(depthAt(box, .99, 0) > 0);
+console.log('PASS: rounded corner and preserved straight edge');

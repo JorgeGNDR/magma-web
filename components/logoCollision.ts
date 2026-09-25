@@ -3,6 +3,23 @@ import * as THREE from "three";
 // Project the real mesh onto the logo's X/Z interaction plane. A fine occupancy
 // grid preserves concavities and holes, unlike circles or a convex hull.
 const RESOLUTION = 96;
+// Round only small contour details (~2% of the piece width), preserving holes.
+const ROUNDING_RADIUS = 2;
+
+function roundCollisionMask(mask: Uint8Array, width: number, height: number) {
+  const rounded = new Uint8Array(mask.length);
+  const weights = [1, 4, 6, 4, 1];
+  for (let z = ROUNDING_RADIUS; z < height - ROUNDING_RADIUS; z++) {
+    for (let x = ROUNDING_RADIUS; x < width - ROUNDING_RADIUS; x++) {
+      let coverage = 0;
+      for (let dz = -2; dz <= 2; dz++) for (let dx = -2; dx <= 2; dx++) {
+        coverage += mask[(z + dz) * width + x + dx] * weights[dx + 2] * weights[dz + 2];
+      }
+      rounded[z * width + x] = coverage >= 128 ? 1 : 0;
+    }
+  }
+  return rounded;
+}
 export type LogoCollider = {
   minX: number; minZ: number; maxX: number; maxZ: number;
   step: number; width: number; height: number;
@@ -23,7 +40,7 @@ export function createLogoCollider(mesh: THREE.Mesh): LogoCollider {
   const minX = box.min.x - step * 2, minZ = box.min.z - step * 2;
   const width = Math.ceil((box.max.x - minX) / step) + 2;
   const height = Math.ceil((box.max.z - minZ) / step) + 2;
-  const mask = new Uint8Array(width * height);
+  let mask = new Uint8Array(width * height);
   const indices = mesh.geometry.index;
   const count = indices?.count ?? positions.count;
   for (let i = 0; i < count; i += 3) {
@@ -43,6 +60,7 @@ export function createLogoCollider(mesh: THREE.Mesh): LogoCollider {
       if (u >= -1e-8 && v >= -1e-8 && u + v <= 1 + 1e-8) mask[z * width + x] = 1;
     }
   }
+  mask = roundCollisionMask(mask, width, height);
   const boundary: number[] = [], outside: number[] = [];
   for (let z = 1; z < height - 1; z++) for (let x = 1; x < width - 1; x++) {
     const i = z * width + x;

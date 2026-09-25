@@ -56,6 +56,7 @@ const COLLISION_CONFIG = {
   impulse: 4.5,
   iterations: 6,
   transfer: 0.72,
+  contactSlopCells: 0.75,
 } as const;
 
 type LogoPiece = {
@@ -371,9 +372,12 @@ export function Original3DLogo() {
           motionB.dragOffset.x + pieceB.spreadDirection.x * motionB.offset * AUDIO_CONFIG.spread,
           motionB.dragOffset.z + pieceB.spreadDirection.y * motionB.offset * AUDIO_CONFIG.spread,
         );
-        if (!contact || contact.depth <= restPenetration) return;
+        // Ignore sub-cell overlap so resting contacts do not alternate between
+        // spring pressure and collision impulses on every frame.
+        const tolerance = Math.max(pieceA.collider.step, pieceB.collider.step) * COLLISION_CONFIG.contactSlopCells;
+        if (!contact || contact.depth <= restPenetration + tolerance) return;
         const { normalX, normalZ } = contact;
-        const correction = (contact.depth - restPenetration) * COLLISION_CONFIG.transfer;
+        const correction = (contact.depth - restPenetration - tolerance) * COLLISION_CONFIG.transfer;
 
         if (motionA.dragging && !motionB.dragging) {
           motionB.dragOffset.x += normalX * correction;
