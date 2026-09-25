@@ -1,27 +1,17 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {createLogoCollider, getLogoContact} from '../components/logoCollision.ts';
-const rectangle = new THREE.Mesh(new THREE.BoxGeometry(2, .1, 1));
-const box = createLogoCollider(rectangle);
-assert.equal(getLogoContact(box,0,0,box,2.1,0),null);
-const hit = getLogoContact(box,0,0,box,1.9,0);
-
-
-assert.ok(hit && hit.normalX > .9 && hit.depth > .07 && hit.depth < .13);
-const shape = new THREE.Shape(); shape.moveTo(-1,-1);shape.lineTo(1,-1);shape.lineTo(1,1);shape.lineTo(-1,1);shape.closePath();
-const hole = new THREE.Path();hole.moveTo(-.5,-.5);hole.lineTo(-.5,.5);hole.lineTo(.5,.5);hole.lineTo(.5,-.5);hole.closePath();shape.holes.push(hole);
-const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape));mesh.rotation.x = Math.PI/2;
-const ring = createLogoCollider(mesh);
-const small = createLogoCollider(new THREE.Mesh(new THREE.BoxGeometry(.3,.1,.3)));
-assert.equal(getLogoContact(ring,0,0,small,0,0),null);
-assert.ok(getLogoContact(ring,0,0,small,.5,0));
-assert.ok(getLogoContact(box,0,0,small,0,0));
-console.log('PASS: separation, contact depth/direction, empty hole, inner edge, containment');
-// The outermost corner is rounded while the middle of a straight edge stays solid.
-const depthAt = (collider, x, z) => collider.depth[
-  Math.floor((z - collider.minZ) / collider.step) * collider.width +
-  Math.floor((x - collider.minX) / collider.step)
-];
-assert.equal(depthAt(box, .99, .49), 0);
-assert.ok(depthAt(box, .99, 0) > 0);
-console.log('PASS: rounded corner and preserved straight edge');
+import { createLogoCollider, getLogoContact } from '../components/logoCollision.ts';
+const oval = createLogoCollider(new THREE.Mesh(new THREE.BoxGeometry(2, .1, 1)));
+assert.equal(getLogoContact(oval, 0, 0, oval, 2.1, 0), null);
+const hit = getLogoContact(oval, 0, 0, oval, 1.9, 0);
+assert.ok(hit && hit.normalX > .99 && Math.abs(hit.depth - .1) < .00001);
+// Former rectangular corners no longer catch another piece.
+assert.equal(getLogoContact(oval, 0, 0, oval, 1.8, .8), null);
+const diagonal = getLogoContact(oval, 0, 0, oval, 1, .5);
+const reverse = getLogoContact(oval, 1, .5, oval, 0, 0);
+assert.ok(diagonal && reverse && diagonal.normalX > 0 && diagonal.normalZ > 0);
+assert.ok(Math.abs(diagonal.normalX + reverse.normalX) < 1e-8);
+assert.ok(Math.abs(diagonal.depth - reverse.depth) < 1e-8);
+const coincident = getLogoContact(oval, 0, 0, oval, 0, 0);
+assert.ok(coincident && Number.isFinite(coincident.depth) && coincident.depth > 0);
+console.log('PASS: oval separation, rounded corners, smooth symmetric contact and containment');

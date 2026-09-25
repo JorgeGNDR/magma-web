@@ -47,8 +47,8 @@ const AUDIO_CONFIG = {
 
 const DRAG_CONFIG = {
   followResponse: 24,
-  // Lower damping preserves motion; a softer spring presses pieces together less.
-  returnDamping: 6,
+  // Damped return prevents oscillation around the original position.
+  returnDamping: 10,
   returnSpring: 32,
 } as const;
 
@@ -57,6 +57,7 @@ const COLLISION_CONFIG = {
   iterations: 6,
   transfer: 0.72,
   contactSlopCells: 0.75,
+  releaseDuration: 1.2,
 } as const;
 
 type LogoPiece = {
@@ -106,6 +107,7 @@ export function Original3DLogo() {
   const scrollProgressRef = useRef(0);
   const pieceMotionRef = useRef<PieceMotion[]>([]);
   const dragStateRef = useRef<DragState | null>(null);
+  const collisionReleaseRef = useRef<number>(COLLISION_CONFIG.releaseDuration);
 
   const material = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
@@ -265,6 +267,12 @@ export function Original3DLogo() {
     if (!group) return;
 
     const safeDelta = Math.min(delta, 1 / 30);
+    collisionReleaseRef.current = dragStateRef.current
+      ? 0
+      : Math.min(COLLISION_CONFIG.releaseDuration, collisionReleaseRef.current + safeDelta);
+    const collisionStrength = 1 - THREE.MathUtils.smoothstep(
+      collisionReleaseRef.current, 0, COLLISION_CONFIG.releaseDuration,
+    );
     const scrollDistance = Math.max(
       (isMobile ? document.getElementById("inicio")?.clientHeight ?? window.innerHeight : window.innerHeight) * SCROLL_CONFIG.distance,
       1,
@@ -355,7 +363,7 @@ export function Original3DLogo() {
 
     for (
       let iteration = 0;
-      iteration < COLLISION_CONFIG.iterations;
+      iteration < COLLISION_CONFIG.iterations && collisionStrength > 0;
       iteration += 1
     ) {
       collisionPairs.forEach(({ indexA, indexB, restPenetration }) => {
@@ -377,7 +385,7 @@ export function Original3DLogo() {
         const tolerance = Math.max(pieceA.collider.step, pieceB.collider.step) * COLLISION_CONFIG.contactSlopCells;
         if (!contact || contact.depth <= restPenetration + tolerance) return;
         const { normalX, normalZ } = contact;
-        const correction = (contact.depth - restPenetration - tolerance) * COLLISION_CONFIG.transfer;
+        const correction = (contact.depth - restPenetration - tolerance) * COLLISION_CONFIG.transfer * collisionStrength;
 
         if (motionA.dragging && !motionB.dragging) {
           motionB.dragOffset.x += normalX * correction;
