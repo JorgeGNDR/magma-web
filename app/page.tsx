@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { DeferredStudio } from "@/components/DeferredStudio";
 import styles from "./page.module.css";
 
-const QUOTE_EMAIL = "magmastudio46520@gmail.com";
+const QUOTE_EMAIL = "contacto@magmaestudio.com";
 
 function getQuoteHref(service: string) {
   const subject = encodeURIComponent(`Presupuesto — ${service}`);
@@ -250,7 +250,7 @@ export default function Home() {
                 grabarlo al estudio!
               </p>
               <a
-                href="mailto:magmastudio46520@gmail.com?subject=Mezcla%20y%20mastering"
+                href={`mailto:${QUOTE_EMAIL}?subject=Mezcla%20y%20mastering`}
               >
                 Envíanos tu proyecto ↗
               </a>
@@ -365,7 +365,7 @@ export default function Home() {
 
           <div className={styles.contactContent}>
             <p>¿Tienes algo en mente?</p>
-            <a href="mailto:magmastudio46520@gmail.com">
+            <a href={`mailto:${QUOTE_EMAIL}`}>
               <span>Hablemos</span>
               <span aria-hidden="true" className={styles.contactArrow}>
                 <svg viewBox="0 0 24 24" focusable="false"><path d="M5 19 19 5M5 5h14v14" /></svg>
