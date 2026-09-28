@@ -343,6 +343,7 @@
 }
 
 .onlineService ul {
+  padding-left: 0;
   font-family: var(--font-geist-mono);
   font-size: 0.62rem;
   letter-spacing: 0.04em;
@@ -412,12 +413,22 @@
   border-top: 1px solid currentColor;
   display: grid;
   gap: 2rem;
-  grid-template-columns:
-    minmax(7rem, 0.35fr)
-    minmax(0, 1.35fr)
-    minmax(22rem, 0.95fr)
-    minmax(2rem, 0.15fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.95fr);
   padding: 1.35rem 0 3.5rem;
+}
+
+.service {
+  row-gap: 0.75rem;
+}
+
+.service h3 {
+  grid-column: 1;
+}
+
+.serviceCopy {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 0;
 }
 
 .service > span {
@@ -1002,7 +1013,7 @@
 
   .onlineServiceMeta {
     gap: 0.75rem;
-    grid-template-columns: 2.5rem 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .onlineService h3 {
@@ -1038,7 +1049,7 @@
 
   .service {
     gap: 1rem;
-    grid-template-columns: 2.5rem 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding: 1rem 0 2rem;
   }
 
@@ -1048,7 +1059,8 @@
   }
 
   .serviceCopy {
-    grid-column: 2;
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .serviceCopy > p {
@@ -1247,7 +1259,7 @@
 }
 
 .projectDetails {
-  grid-column: 2;
+  grid-column: 1;
   min-width: 0;
 }
 
@@ -1276,7 +1288,7 @@
 }
 
 .spotifyPlayer {
-  grid-column: 3;
+  grid-column: 2;
   align-self: start;
   display: block;
   border: 0;
@@ -1286,11 +1298,11 @@
 
 @media (max-width: 800px) {
   .projectEntry {
-    grid-template-columns: 2.5rem minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
     padding: 1rem 0 2rem;
   }
-  .spotifyPlayer { grid-column: 2; }
+  .spotifyPlayer { grid-column: 1; }
   .projectDetails h4 { font-size: clamp(1.45rem, 6.3vw, 2rem); line-height: 1.05; }
   .projectDetails p { margin-top: 0.65rem; font-size: 0.8rem; }
 }
