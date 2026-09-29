@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { DeferredStudio } from "@/components/DeferredStudio";
 import styles from "./page.module.css";
 
-const QUOTE_EMAIL = "contacto@magmaestudio.com";
+const QUOTE_EMAIL = "hola@magmaestudio.com";
 
 function getQuoteHref(service: string) {
   const subject = encodeURIComponent(`Presupuesto — ${service}`);
