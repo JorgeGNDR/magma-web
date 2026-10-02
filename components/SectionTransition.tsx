@@ -11,6 +11,7 @@ const MOTION_QUERY =
   "(prefers-reduced-motion: no-preference)";
 
 const NAVIGATION_EVENT = "magma:section-navigation";
+export const SECTION_ARRIVAL_EVENT = "magma:section-arrival";
 
 export function navigateWithSectionTransition(hash: string) {
   window.dispatchEvent(new CustomEvent<string>(NAVIGATION_EVENT, { detail: hash }));
@@ -68,6 +69,8 @@ function jumpToSection(target: HTMLElement, hash: string) {
   root.style.scrollBehavior = "auto";
   target.scrollIntoView({ block: "start" });
   window.history.pushState(null, "", hash);
+  // Reset header direction tracking before the queued scroll event is handled.
+  window.dispatchEvent(new Event(SECTION_ARRIVAL_EVENT));
 
   window.requestAnimationFrame(() => {
     root.style.scrollBehavior = previousScrollBehavior;
@@ -161,8 +164,6 @@ export function SectionTransition() {
 
       const target = document.querySelector<HTMLElement>(hash);
       if (!target) return;
-
-      if (!window.matchMedia(MOTION_QUERY).matches) return;
 
       event.preventDefault();
       await transitionToSection(target, hash);

@@ -2,7 +2,7 @@
 
 import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { navigateWithSectionTransition } from "./SectionTransition";
+import { navigateWithSectionTransition, SECTION_ARRIVAL_EVENT } from "./SectionTransition";
 import menuStyles from "./MobileMenu.module.css";
 import styles from "@/app/page.module.css";
 
@@ -105,11 +105,19 @@ export function SiteHeader() {
       }
     };
 
+    const handleSectionArrival = () => {
+      lastScrollYRef.current = window.scrollY;
+      setIsVisible(true);
+      setSurface(getHeaderSurface());
+    };
+
+    window.addEventListener(SECTION_ARRIVAL_EVENT, handleSectionArrival);
     window.addEventListener("scroll", handleScroll, { passive: true });
     frameRef.current = window.requestAnimationFrame(updateHeader);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(SECTION_ARRIVAL_EVENT, handleSectionArrival);
 
       if (frameRef.current !== null) {
         window.cancelAnimationFrame(frameRef.current);
