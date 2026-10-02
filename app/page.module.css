@@ -1191,3 +1191,57 @@
   .projectDetails h4 { font-size: clamp(1.45rem, 6.3vw, 2rem); line-height: 1.05; }
   .projectDetails p { margin-top: 0.65rem; font-size: 0.8rem; }
 }
+
+/* Keep section labels below the fixed header without exposing the preceding section. */
+.studioShowcase,
+.services,
+.projects,
+.contact {
+  padding-top: 5.5rem;
+  scroll-margin-top: 0;
+}
+
+.contact {
+  min-height: 100svh;
+}
+
+@media (min-width: 801px) {
+  .contact {
+    padding-bottom: 1rem;
+  }
+
+  .contactContent {
+    margin-top: clamp(1.25rem, 3vh, 2.5rem);
+  }
+
+  .contactContent p {
+    margin-bottom: 0.75rem;
+  }
+
+  .contactContent a {
+    font-size: clamp(4rem, min(9vw, 15vh), 9rem);
+  }
+
+  .contactLayout {
+    margin-top: clamp(1.5rem, 4vh, 3rem);
+  }
+
+  .contactField {
+    gap: 0.5rem;
+    padding: 0.65rem 0 0.85rem;
+  }
+
+  .contactField textarea {
+    height: 4rem;
+    min-height: 4rem;
+  }
+
+  .contactSubmit {
+    padding-top: 0.75rem;
+  }
+
+  .footer {
+    margin-top: auto;
+    padding-top: 1.5rem;
+  }
+}
