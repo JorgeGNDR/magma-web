@@ -464,7 +464,7 @@
   background: var(--color-accent);
   color: var(--color-brand-soft-black);
   min-height: 100svh;
-  padding: 2rem 1.6rem 10rem;
+  padding: 2rem 1.6rem 2.5rem;
   position: relative;
   scroll-margin-top: 0;
   z-index: 2;
@@ -990,7 +990,7 @@
   }
 
   .projects {
-    padding-bottom: 6rem;
+    padding-bottom: 1.5rem;
   }
 
   .projectIntro {
