@@ -62,7 +62,7 @@ const COLLISION_CONFIG = {
 
 type LogoPiece = {
   basePosition: THREE.Vector3;
-  center: THREE.Vector2;
+  frequencyBoost: number;
   centerX: number;
   collider: LogoCollider;
   mesh: THREE.Mesh;
@@ -135,10 +135,7 @@ export function Original3DLogo() {
       const geometryCenter = child.geometry.boundingBox?.getCenter(
         new THREE.Vector3(),
       );
-      const geometrySize = child.geometry.boundingBox?.getSize(
-        new THREE.Vector3(),
-      );
-      if (!geometryCenter || !geometrySize) return;
+      if (!geometryCenter) return;
 
       const centerX = geometryCenter.x + child.position.x;
       const centerZ = geometryCenter.z + child.position.z;
@@ -153,7 +150,7 @@ export function Original3DLogo() {
 
       nextPieces.push({
         basePosition: child.position.clone(),
-        center: new THREE.Vector2(centerX, centerZ),
+        frequencyBoost: 1,
         centerX,
         collider: createLogoCollider(child),
         mesh: child,
@@ -162,6 +159,14 @@ export function Original3DLogo() {
     });
 
     nextPieces.sort((pieceA, pieceB) => pieceA.centerX - pieceB.centerX);
+
+    nextPieces.forEach((piece, index) => {
+      piece.frequencyBoost = THREE.MathUtils.lerp(
+        1,
+        AUDIO_CONFIG.highFrequencyBoost,
+        nextPieces.length > 1 ? index / (nextPieces.length - 1) : 0,
+      );
+    });
 
     const nextCollisionPairs: CollisionPair[] = [];
 
@@ -307,14 +312,7 @@ export function Original3DLogo() {
     }
 
     pieces.forEach((piece, index) => {
-      const highFrequencyMix =
-        pieces.length > 1 ? index / (pieces.length - 1) : 0;
-      const frequencyBoost = THREE.MathUtils.lerp(
-        1,
-        AUDIO_CONFIG.highFrequencyBoost,
-        highFrequencyMix,
-      );
-      const rawEnergy = (audioSignal.bands[index] ?? 0) * frequencyBoost;
+      const rawEnergy = (audioSignal.bands[index] ?? 0) * piece.frequencyBoost;
       const normalizedEnergy = THREE.MathUtils.clamp(
         (rawEnergy - AUDIO_CONFIG.threshold) / (1 - AUDIO_CONFIG.threshold),
         0,

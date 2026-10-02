@@ -529,96 +529,6 @@
   margin-top: 2.5rem;
 }
 
-.projectRow {
-  align-items: center;
-  border-top: 1px solid currentColor;
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: minmax(3rem, 0.35fr) 3.75rem 2fr 1fr auto 1.5rem;
-  isolation: isolate;
-  min-height: 5.6rem;
-  overflow: hidden;
-  position: relative;
-  transition: color 260ms ease;
-}
-
-.projectCover {
-  aspect-ratio: 1;
-  background: color-mix(in srgb, currentColor 12%, transparent);
-  display: block;
-  overflow: hidden;
-  width: 3.75rem;
-}
-
-.projectCover img {
-  display: block;
-  height: 100%;
-  object-fit: cover;
-  width: 100%;
-}
-
-.projectRow::before {
-  background: var(--color-brand-soft-black);
-  content: "";
-  inset: 0;
-  position: absolute;
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: -1;
-}
-
-.projectRow > * {
-  position: relative;
-  z-index: 1;
-}
-
-.projectRow h4 {
-  font-size: clamp(1.25rem, 2.6vw, 2.8rem);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 0.95;
-  margin: 0;
-  text-transform: uppercase;
-}
-
-.projectRow > span:first-child,
-.projectRow > span:last-child,
-.projectRow > p,
-.projectRow time,
-.projectRow div p {
-  font-family: var(--font-geist-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.projectRow div p {
-  margin-top: 0.3rem;
-}
-
-.projectRow > span:last-child {
-  font-family: inherit;
-  font-size: 1.2rem;
-  justify-self: end;
-  transition: transform 350ms ease;
-}
-
-.projectRow:hover,
-.projectRow:focus-visible {
-  color: var(--color-brand-off-white);
-  outline: none;
-}
-
-.projectRow:hover::before,
-.projectRow:focus-visible::before {
-  transform: scaleY(1);
-}
-
-.projectRow:hover > span:last-child {
-  transform: rotate(45deg);
-}
-
 .contact {
   background: var(--color-brand-soft-black);
   color: var(--color-brand-off-white);
@@ -1112,22 +1022,6 @@
     max-width: 17rem;
   }
 
-  .projectRow {
-    gap: 0.6rem;
-    grid-template-columns: 2rem 3rem minmax(0, 1fr) auto;
-    min-height: 4.75rem;
-    padding: 0.55rem 0;
-  }
-
-  .projectCover {
-    width: 3rem;
-  }
-
-  .projectRow > p,
-  .projectRow > span:last-child {
-    display: none;
-  }
-
   .contact {
     min-height: auto;
     padding-bottom: 1.1rem;
@@ -1200,19 +1094,10 @@
 
   .availability::after,
   .heroMeta a::after,
-  .projectRow,
-  .projectRow::before,
-  .projectRow > span:last-child,
   .contactContent a {
     transition: none;
   }
 }
-
-
-
-
-
-
 
 .navigation a {
   display: block;
