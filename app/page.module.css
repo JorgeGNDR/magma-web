@@ -1284,3 +1284,9 @@
 .studioShowcase {
   padding-bottom: calc(var(--floating-footer-height, 5rem) + 1.5rem);
 }
+
+@media (max-width: 800px) {
+  .contact {
+    padding-bottom: calc(var(--floating-footer-height, 6rem) + 2rem + env(safe-area-inset-bottom, 0px));
+  }
+}
