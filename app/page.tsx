@@ -1,3 +1,4 @@
+import { FloatingFooter } from "@/components/FloatingFooter";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { LogoScene } from "@/components/LogoScene";
 import { MobileSceneControls } from "@/components/MobileSceneControls";
@@ -452,7 +453,7 @@ export default function Home() {
 
         </section>
       </main>
-      <footer className={styles.footer}>
+      <FloatingFooter>
             <span>MAGMA® {new Date().getFullYear()}©</span>
             <span>Estudio independiente<br />de música contemporánea</span>
             <a
@@ -464,7 +465,7 @@ export default function Home() {
               Instagram ↗
             </a>
             <a href={`mailto:${QUOTE_EMAIL}`}>{QUOTE_EMAIL}</a>
-      </footer>
+      </FloatingFooter>
     </>
   );
 }
