@@ -728,17 +728,22 @@
   background: var(--color-brand-off-white);
   color: var(--color-brand-soft-black);
   display: grid;
-  font-family: var(--font-geist-sans);
-  font-size: clamp(0.8rem, 1vw, 1rem);
+  font-family: var(--font-geist-mono);
+  font-size: clamp(0.68rem, 0.85vw, 0.9rem);
   font-weight: 700;
-  grid-template-columns: 1fr 1.4fr 0.8fr auto;
+  grid-template-columns: 0.8fr 1.4fr 1.25fr auto;
   gap: 2rem;
-  letter-spacing: -0.035em;
-  line-height: 1.1;
+  letter-spacing: 0;
+  line-height: 1.35;
   min-height: clamp(8rem, 13vw, 12rem);
   padding: 3rem 1.6rem 1.25rem;
   position: relative;
   z-index: 2;
+}
+
+.footer > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .footer a:last-child {
