@@ -22,8 +22,7 @@
   gap: clamp(1rem, 2vw, 1.4rem);
 }
 
-.transport,
-.track {
+.transport {
   appearance: none;
   background: transparent;
   border: 0;
@@ -117,7 +116,6 @@
 }
 
 .transport:focus-visible,
-.track:focus-visible,
 .progress:focus-visible {
   outline: 1px solid currentColor;
   outline-offset: 0.3rem;
@@ -176,76 +174,6 @@
   width: 0.48rem;
 }
 
-.playlist {
-  clip-path: inset(0 0 100% 0);
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
-  transform: translateY(-0.45rem);
-  transition:
-    clip-path 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    max-height 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 220ms ease,
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.playerShell:hover .playlist,
-.playerShell:has(:focus-visible) .playlist {
-  clip-path: inset(0);
-  max-height: 12rem;
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.track {
-  --track-delay: 0ms;
-  border-top: 1px solid var(--color-brand-soft-black);
-  display: block;
-  font-size: clamp(0.58rem, 0.7vw, 0.7rem);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  opacity: 0;
-  overflow: hidden;
-  padding: 0.56rem 0;
-  text-align: left;
-  text-overflow: ellipsis;
-  transform: translateY(-0.45rem);
-  transition:
-    color 180ms ease,
-    padding-left 240ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 220ms ease,
-    transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
-  white-space: nowrap;
-  width: 100%;
-}
-
-.track:nth-child(2) {
-  --track-delay: 55ms;
-}
-
-.track:nth-child(3) {
-  --track-delay: 110ms;
-}
-
-.playerShell:hover .track,
-.playerShell:has(:focus-visible) .track {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: 0ms, 0ms, var(--track-delay), var(--track-delay);
-}
-
-.track:last-child {
-  border-bottom: 1px solid var(--color-brand-soft-black);
-}
-
-.track:hover,
-.track[data-active="true"] {
-  color: var(--color-brand-magma-orange);
-  padding-left: 0.35rem;
-}
-
 @media (max-width: 800px) {
   .playerShell {
     --player-width: min(21rem, calc(100vw - 1.5rem));
@@ -258,21 +186,6 @@
 
   .playerShell[data-playing="true"] .compactRow {
     gap: 0.8rem;
-  }
-}
-
-@media (hover: none) {
-  .playerShell:focus-within .playlist {
-    clip-path: inset(0);
-    max-height: 12rem;
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
-
-  .playerShell:focus-within .track {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 

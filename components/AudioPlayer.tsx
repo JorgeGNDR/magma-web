@@ -14,23 +14,7 @@ import {
 } from "./audioSignal";
 import styles from "./AudioPlayer.module.css";
 
-const PLAYLIST = [
-  {
-    id: "just-an-illusion",
-    label: "MAGMA — JUST AN ILLUSION",
-    src: "/audio/justanillusion.mp3",
-  },
-  {
-    id: "session-02",
-    label: "MAGMA — SESSION 02",
-    src: "/audio/justanillusion.mp3",
-  },
-  {
-    id: "session-03",
-    label: "MAGMA — SESSION 03",
-    src: "/audio/justanillusion.mp3",
-  },
-] as const;
+const TRACK_URL = "/audio/justanillusion.mp3";
 
 const LOW_BAND_MIN_HZ = 20;
 const LOW_BAND_MAX_HZ = 120;
@@ -112,10 +96,8 @@ function spatialBand(graph: AudioGraph, bandIndex: number) {
 }
 
 export function AudioPlayer() {
-  const [activeTrackIndex, setActiveTrackIndex] = useState(0);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
   const [progress, setProgress] = useState(0);
-  const activeTrackIndexRef = useRef(0);
   const graphRef = useRef<AudioGraph | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
@@ -162,13 +144,14 @@ export function AudioPlayer() {
     setProgress(duration > 0 ? audio.currentTime / duration : 0);
   }
 
-  function createAudioGraph(trackIndex = activeTrackIndexRef.current) {
-    const audio = new Audio(PLAYLIST[trackIndex].src);
+  function createAudioGraph() {
+    const audio = new Audio(TRACK_URL);
     const context = new AudioContext();
     const analyser = context.createAnalyser();
     const source = context.createMediaElementSource(audio);
 
     audio.preload = "auto";
+    audio.loop = true;
     analyser.fftSize = 2048;
     analyser.smoothingTimeConstant = 0.68;
     source.connect(analyser);
@@ -184,11 +167,7 @@ export function AudioPlayer() {
 
     audio.addEventListener("timeupdate", () => updateProgress(audio));
     audio.addEventListener("loadedmetadata", () => updateProgress(audio));
-    audio.addEventListener("ended", () => {
-      const nextTrackIndex =
-        (activeTrackIndexRef.current + 1) % PLAYLIST.length;
-      void loadTrack(nextTrackIndex, true);
-    });
+
 
     graphRef.current = graph;
     return graph;
@@ -205,34 +184,6 @@ export function AudioPlayer() {
     } catch {
       stopAnalysis();
       setPlaybackState("missing");
-    }
-  }
-
-  async function loadTrack(trackIndex: number, shouldPlay: boolean) {
-    const track = PLAYLIST[trackIndex];
-    activeTrackIndexRef.current = trackIndex;
-    setActiveTrackIndex(trackIndex);
-    setProgress(0);
-
-    const existingGraph = graphRef.current;
-    if (!existingGraph) {
-      if (shouldPlay) {
-        await playGraph(createAudioGraph(trackIndex));
-      } else {
-        setPlaybackState("idle");
-      }
-      return;
-    }
-
-    existingGraph.audio.pause();
-    stopAnalysis();
-    existingGraph.audio.src = track.src;
-    existingGraph.audio.load();
-
-    if (shouldPlay) {
-      await playGraph(existingGraph);
-    } else {
-      setPlaybackState("idle");
     }
   }
 
@@ -329,25 +280,7 @@ export function AudioPlayer() {
         </button>
       </div>
 
-      <div className={styles.playlist} aria-label="Playlist de MAGMA">
-        {PLAYLIST.map((track, trackIndex) => (
-          <button
-            aria-current={
-              trackIndex === activeTrackIndex ? "true" : undefined
-            }
-            className={styles.track}
-            data-active={trackIndex === activeTrackIndex}
-            key={track.id}
-            onClick={() =>
-              void loadTrack(trackIndex, playbackState === "playing")
-            }
-            onPointerUp={releaseMouseFocus}
-            type="button"
-          >
-            {track.label}
-          </button>
-        ))}
-      </div>
+
     </div>
   );
 }

@@ -453,6 +453,14 @@ export default function Home() {
           <footer className={styles.footer}>
             <span>MAGMA®</span>
             <span>Estudio de música contemporánea</span>
+            <a
+              href="https://www.instagram.com/magmaestudio__/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram de MAGMA: @magmaestudio__ (abre en una nueva pestaña)"
+            >
+              Instagram ↗
+            </a>
             <span>© {new Date().getFullYear()}</span>
           </footer>
         </section>

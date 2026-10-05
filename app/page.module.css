@@ -728,7 +728,8 @@
   display: grid;
   font-family: var(--font-geist-mono);
   font-size: 0.62rem;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 1rem;
   letter-spacing: 0.04em;
   margin-top: clamp(6rem, 14vh, 10rem);
   text-transform: uppercase;
@@ -1077,7 +1078,7 @@
   }
 
   .footer {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
     margin-top: 5rem;
   }
 
@@ -1244,4 +1245,13 @@
     margin-top: auto;
     padding-top: 1.5rem;
   }
+}
+
+.footer a:hover {
+  color: var(--color-accent);
+}
+
+.footer a:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 4px;
 }
