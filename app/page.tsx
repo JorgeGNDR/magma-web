@@ -450,9 +450,11 @@ export default function Home() {
             </form>
           </div>
 
-          <footer className={styles.footer}>
-            <span>MAGMA®</span>
-            <span>Estudio de música contemporánea</span>
+        </section>
+      </main>
+      <footer className={styles.footer}>
+            <span>MAGMA® {new Date().getFullYear()}©</span>
+            <span>Estudio independiente<br />de música contemporánea</span>
             <a
               href="https://www.instagram.com/magmaestudio__/"
               target="_blank"
@@ -461,10 +463,8 @@ export default function Home() {
             >
               Instagram ↗
             </a>
-            <span>© {new Date().getFullYear()}</span>
-          </footer>
-        </section>
-      </main>
+            <a href={`mailto:${QUOTE_EMAIL}`}>{QUOTE_EMAIL}</a>
+      </footer>
     </>
   );
 }
