@@ -454,16 +454,16 @@ export default function Home() {
       </main>
       <footer className={styles.footer}>
             <span>MAGMA® {new Date().getFullYear()}©</span>
-            <span>Av. 9 de Octubre, 89<br />46510 Puerto de Sagunto,<br />Valencia, España</span>
+            <span>Estudio independiente<br />de música contemporánea</span>
             <a
               href="https://www.instagram.com/magmaestudio__/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram de MAGMA: @magmaestudio__ (abre en una nueva pestaña)"
             >
-              Instagram: @magmaestudio__
+              Instagram ↗
             </a>
-            <a href="mailto:hola@magmaestudio.com">hola@magmaestudio.com</a>
+            <a href={`mailto:${QUOTE_EMAIL}`}>{QUOTE_EMAIL}</a>
       </footer>
     </>
   );
