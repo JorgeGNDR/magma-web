@@ -4,6 +4,8 @@ allowBuilds:
 
 # Security patch for ESLint's transitive YAML parser.
 overrides:
+  # CVE-2026-93749: validate indexed source-map offsets.
+  'source-map-js@>=1.0.0 <1.2.2': 1.2.2
   'js-yaml@>=4.0.0 <4.3.2': 4.3.2
   # Patch brace-expansion DoS advisories in both transitive major versions.
   'brace-expansion@>=1.0.0 <1.1.21': 1.1.21
