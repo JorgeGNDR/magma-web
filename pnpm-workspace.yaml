@@ -4,6 +4,8 @@ allowBuilds:
 
 # Security patch for ESLint's transitive YAML parser.
 overrides:
+  # GHSA-wq5f-xc86-pv6w: patched librsvg in sharp's prebuilt binaries.
+  'sharp@<0.35.5': 0.35.5
   # CVE-2026-93749: validate indexed source-map offsets.
   'source-map-js@>=1.0.0 <1.2.2': 1.2.2
   'js-yaml@>=4.0.0 <4.3.2': 4.3.2
