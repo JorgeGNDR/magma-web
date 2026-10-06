@@ -8,6 +8,14 @@ const nextConfig = {
   outputFileTracingIncludes: {
     "*": ["./node_modules/@swc/helpers/**"],
   },
+  async redirects() {
+    return [{
+      source: "/:path*",
+      has: [{ type: "host", value: "www.magmaestudio.com" }],
+      destination: "https://magmaestudio.com/:path*",
+      permanent: true,
+    }];
+  },
   async headers() {
     return [{
       source: "/:path*",
