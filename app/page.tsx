@@ -457,10 +457,10 @@ export default function Home() {
             <span>MAGMA® {new Date().getFullYear()}©</span>
             <span>Estudio independiente<br />de música contemporánea</span>
             <a
-              href="https://www.instagram.com/magmaestudio__/"
+              href="https://www.instagram.com/magmaestudio___/"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Instagram de MAGMA: @magmaestudio__ (abre en una nueva pestaña)"
+              aria-label="Instagram de MAGMA: @magmaestudio___ (abre en una nueva pestaña)"
             >
               Instagram ↗
             </a>
