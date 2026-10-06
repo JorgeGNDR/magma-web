@@ -11,6 +11,10 @@ const nextConfig = {
   async headers() {
     return [{
       source: "/:path*",
+      has: [{ type: "host", value: "dev.magmaestudio.com" }],
+      headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+    }, {
+      source: "/:path*",
       headers: [
         { key: "X-Content-Type-Options", value: "nosniff" },
         { key: "X-Frame-Options", value: "DENY" },

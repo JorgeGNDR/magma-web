@@ -141,7 +141,7 @@ export default function Home() {
       <main>
         <section className={styles.hero} id="inicio" aria-labelledby="hero-title">
           <h1 className={styles.srOnly} id="hero-title">
-            MAGMA, estudio de música contemporánea
+            MAGMA, estudio de grabación y producción musical en Puerto de Sagunto, Valencia
           </h1>
 
           <div className={styles.scene}>

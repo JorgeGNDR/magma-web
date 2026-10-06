@@ -14,9 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MAGMA — Estudio de música contemporánea",
+  metadataBase: new URL("https://magmaestudio.com"),
+  title: "MAGMA | Estudio de grabación en Puerto de Sagunto, Valencia",
   description:
-    "Producción musical, grabación, mezcla y mastering con una identidad propia.",
+    "Estudio de música en Puerto de Sagunto, Valencia. Producción musical, grabación, mezcla y mastering para dar identidad propia a tu proyecto.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "es_ES",
+    url: "/",
+    siteName: "MAGMA Estudio",
+    title: "MAGMA | Estudio de grabación en Puerto de Sagunto, Valencia",
+    description: "Producción musical, grabación, mezcla y mastering con identidad propia en Puerto de Sagunto, Valencia.",
+  },
+  twitter: {
+    card: "summary",
+    title: "MAGMA | Estudio de grabación en Puerto de Sagunto, Valencia",
+    description: "Producción musical, grabación, mezcla y mastering con identidad propia.",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
