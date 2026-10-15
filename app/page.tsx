@@ -1,3 +1,4 @@
+import { ContactForm } from "@/components/ContactForm";
 import { FloatingFooter } from "@/components/FloatingFooter";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { LogoScene } from "@/components/LogoScene";
@@ -373,10 +374,9 @@ export default function Home() {
               <a href={`mailto:${QUOTE_EMAIL}`}>{QUOTE_EMAIL}</a>
             </div>
 
-            <form
-              action={`https://formsubmit.co/${QUOTE_EMAIL}`}
+            <ContactForm
+              email={QUOTE_EMAIL}
               className={styles.contactForm}
-              method="POST"
             >
               <input
                 name="_subject"
@@ -444,11 +444,7 @@ export default function Home() {
                 />
               </div>
 
-              <div className={styles.contactSubmit}>
-                <p>Responderemos lo antes posible.</p>
-                <button type="submit">Enviar proyecto ↗</button>
-              </div>
-            </form>
+            </ContactForm>
           </div>
 
         </section>
