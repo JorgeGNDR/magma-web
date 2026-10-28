@@ -1,0 +1,25 @@
+# Apache 2.4: requires mod_headers, mod_rewrite, mod_mime and AllowOverride
+# FileInfo Indexes Options AuthConfig. Deploy this as .htaccess in the web root.
+Options -Indexes -MultiViews
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.magmaestudio\.com(?::[0-9]+)?$ [NC]
+RewriteRule ^ https://magmaestudio.com%{REQUEST_URI} [R=308,L,NE]
+
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+# Same scoped policy as the previous Next server; permits Spotify frames.
+Header always set Content-Security-Policy "base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://formsubmit.co; frame-src https://open.spotify.com"
+Header always set X-Robots-Tag "noindex" "expr=%{HTTP_HOST} =~ m#(?i)^dev\.magmaestudio\.com(?::[0-9]+)?$#"
+
+AddType application/wasm .wasm
+AddType model/gltf-binary .glb
+AddType audio/mpeg .mp3
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

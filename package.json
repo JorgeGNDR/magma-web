@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/check-public-assets.mjs && next build",
-    "start": "next start",
+    "build": "node scripts/check-public-assets.mjs && next build && node scripts/prepare-static-export.mjs",
+    "preview": "python3 -m http.server 3000 --bind 127.0.0.1 --directory out",
     "lint": "eslint",
     "check:public": "node scripts/check-public-assets.mjs"
   },
