@@ -63,8 +63,10 @@ servicio. Spotify también requiere conexión a su servicio externo.
 
 El sitio `magmaestudio.com` está conectado a `JorgeGNDR/magma-web`, rama `main`.
 Los pushes a esa rama activan la compilación y publicación. Los ajustes de build
-deben usar Node 22, framework Next.js, gestor `pnpm`, script `build` y directorio
-de salida `out`, sin archivo de entrada. Node se necesita durante la compilación;
+deben usar Node 22, perfil frontend React, gestor `pnpm`, script `build` y directorio
+de salida `out`, sin archivo de entrada. El código sigue usando Next.js: el perfil
+React evita la preparación de salida de servidor del adaptador Next de Hostinger.
+Node se necesita durante la compilación;
 la publicación debe servir el resultado estático sin arrancar un servidor Next.
 
 No subir `out/` a Git ni conectar el repositorio fuente al despliegue de archivos
